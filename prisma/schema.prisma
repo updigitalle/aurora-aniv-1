@@ -1,62 +1,62 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Event {
-  id              String   @id @default(uuid())
-  name            String
-  slug            String   @unique
-  babyName        String
-  date            DateTime
-  locationName    String
-  locationAddress String
-  locationMapUrl  String?
-  description     String?
-  bgImage         String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  guests          Guest[]
+  id               String   @id @default(uuid())
+  name             String
+  slug             String   @unique
+  babyName         String
+  date             DateTime
+  locationName     String
+  locationAddress  String
+  locationMapUrl   String?
+  description      String?
+  bgImage          String?
+  giftSuggestions  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  guests           Guest[]
 }
 
 model Task {
   id        String    @id @default(uuid())
   title     String
-  category  String    // e.g., "decoração", "comida", "convites", "geral"
+  category  String
   dueDate   DateTime?
-  priority  String    @default("media") // "alta" | "media" | "baixa"
+  priority  String    @default("media")
   completed Boolean   @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
 
 model Guest {
-  id            String    @id @default(uuid())
-  name          String
-  phone         String?
-  adultsCount   Int       @default(1)
-  childrenCount Int       @default(0)
-  status        String    @default("pendente") // "pendente" | "confirmado" | "nao_vai"
-  origin        String    @default("rsvp_online") // "manual" | "rsvp_online"
-  notes         String?
-  respondedAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  eventId       String
-  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  id              String    @id @default(uuid())
+  name            String
+  phone           String?
+  adultsCount     Int       @default(1)
+  childrenCount   Int       @default(0)
+  status          String    @default("pendente") // "pendente" | "confirmado" | "nao_vai"
+  origin          String    @default("rsvp_online") // "manual" | "rsvp_online"
+  notes           String?
+  familyMembers   String?   // JSON: [{name, type: "adulto"|"crianca", confirmed: boolean}]
+  respondedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  eventId         String
+  event           Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
 model Expense {
   id           String   @id @default(uuid())
   description  String
-  category     String   // e.g., "espaço", "comida", "decoração", "lembrancinhas"
+  category     String
   plannedValue Float    @default(0.0)
   actualValue  Float    @default(0.0)
   paid         Boolean  @default(false)
@@ -67,15 +67,30 @@ model Expense {
 }
 
 model Vendor {
-  id          String    @id @default(uuid())
-  name        String
-  service     String    // e.g., "fotógrafo", "buffet", "decoração"
-  phone       String?
-  email       String?
-  status      String    @default("a_cotar") // "a_cotar" | "contratado" | "pago"
-  agreedValue Float     @default(0.0)
-  notes       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  expenses    Expense[]
+  id              String    @id @default(uuid())
+  name            String
+  service         String
+  phone           String?
+  email           String?
+  status          String    @default("a_cotar") // "a_cotar" | "contratado" | "pago"
+  agreedValue     Float     @default(0.0)
+  depositValue    Float     @default(0.0)       // valor de entrada (opcional)
+  paymentMethod   String    @default("pix_unico") // "cartao_credito" | "pix_unico" | "pix_parcelado" | "dinheiro"
+  paymentDates    String?                        // JSON: string[] de datas ISO para pix_parcelado
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  expenses        Expense[]
+  payments        Payment[]
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  vendorId      String
+  vendor        Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  amount        Float
+  paymentMethod String   // "cartao_credito" | "pix" | "dinheiro"
+  paymentDate   DateTime
+  notes         String?
+  createdAt     DateTime @default(now())
 }

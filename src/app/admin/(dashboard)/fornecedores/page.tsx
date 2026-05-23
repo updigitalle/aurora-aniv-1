@@ -8,8 +8,9 @@ export default async function FornecedoresPage() {
   const vendors = await db.vendor.findMany({
     include: {
       expenses: true,
+      payments: { orderBy: { paymentDate: 'asc' } },
     },
-    orderBy: { name: 'asc' },
+    orderBy: { createdAt: 'desc' },
   });
 
   return <VendorListClient initialVendors={vendors} />;

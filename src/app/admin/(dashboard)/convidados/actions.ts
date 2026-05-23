@@ -3,55 +3,67 @@
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
-export async function deleteGuest(id: string) {
-  try {
-    await db.guest.delete({
-      where: { id },
-    });
-    revalidatePath('/admin/convidados');
-    revalidatePath('/admin/dashboard');
-    return { success: true };
-  } catch (error) {
-    console.error('Erro ao deletar convidado:', error);
-    return { success: false, error: 'Erro ao deletar convidado.' };
-  }
+export type FamilyMember = {
+  name: string;
+  type: 'adulto' | 'crianca';
+  confirmed: boolean;
+};
+
+const revalidateAll = () => {
+  revalidatePath('/admin/convidados');
+  revalidatePath('/admin/dashboard');
+};
+
+/** Calcula adultsCount e childrenCount a partir dos membros confirmados */
+function countFromMembers(members: FamilyMember[], status: string) {
+  if (members.length === 0) return { adultsCount: 0, childrenCount: 0 };
+  const confirmed = status === 'confirmado' ? members.filter(m => m.confirmed) : members;
+  return {
+    adultsCount:   confirmed.filter(m => m.type === 'adulto').length,
+    childrenCount: confirmed.filter(m => m.type === 'crianca').length,
+  };
 }
 
 export async function createGuest(data: {
   name: string;
   phone?: string;
-  adultsCount: number;
-  childrenCount: number;
   status: string;
   origin: string;
   notes?: string;
+  familyMembers?: FamilyMember[];
+  adultsCount?: number;
+  childrenCount?: number;
 }) {
   try {
-    if (!data.name.trim()) {
-      return { success: false, error: 'O nome do convidado é obrigatório.' };
-    }
+    if (!data.name.trim()) return { success: false, error: 'O nome é obrigatório.' };
 
     const event = await db.event.findFirst();
-    if (!event) {
-      return { success: false, error: 'Configure os dados do evento primeiro.' };
-    }
+    if (!event) return { success: false, error: 'Configure os dados do evento primeiro.' };
+
+    const members = data.familyMembers ?? [];
+    const counts = members.length > 0
+      ? countFromMembers(members, data.status)
+      : {
+          adultsCount:   data.status === 'confirmado' ? (data.adultsCount ?? 1) : 0,
+          childrenCount: data.status === 'confirmado' ? (data.childrenCount ?? 0) : 0,
+        };
 
     await db.guest.create({
       data: {
-        name: data.name.trim(),
-        phone: data.phone?.trim() || '',
-        adultsCount: data.status === 'confirmado' ? Math.max(1, data.adultsCount) : 0,
-        childrenCount: data.status === 'confirmado' ? Math.max(0, data.childrenCount) : 0,
-        status: data.status || 'pendente',
-        origin: data.origin || 'manual',
-        notes: data.notes?.trim() || '',
-        respondedAt: data.status !== 'pendente' ? new Date() : null,
-        eventId: event.id,
+        name:          data.name.trim(),
+        phone:         data.phone?.trim() || '',
+        status:        data.status || 'pendente',
+        origin:        data.origin || 'manual',
+        notes:         data.notes?.trim() || '',
+        familyMembers: members.length > 0 ? JSON.stringify(members) : null,
+        adultsCount:   counts.adultsCount,
+        childrenCount: counts.childrenCount,
+        respondedAt:   data.status !== 'pendente' ? new Date() : null,
+        eventId:       event.id,
       },
     });
 
-    revalidatePath('/admin/convidados');
-    revalidatePath('/admin/dashboard');
+    revalidateAll();
     return { success: true };
   } catch (error) {
     console.error('Erro ao criar convidado:', error);
@@ -64,48 +76,60 @@ export async function updateGuest(
   data: {
     name: string;
     phone?: string;
-    adultsCount: number;
-    childrenCount: number;
     status: string;
     notes?: string;
+    familyMembers?: FamilyMember[];
+    adultsCount?: number;
+    childrenCount?: number;
   }
 ) {
   try {
-    if (!data.name.trim()) {
-      return { success: false, error: 'O nome do convidado é obrigatório.' };
-    }
+    if (!data.name.trim()) return { success: false, error: 'O nome é obrigatório.' };
 
-    const originalGuest = await db.guest.findUnique({ where: { id } });
-    if (!originalGuest) {
-      return { success: false, error: 'Convidado não encontrado.' };
-    }
+    const original = await db.guest.findUnique({ where: { id } });
+    if (!original) return { success: false, error: 'Convidado não encontrado.' };
 
-    // Se mudou de pendente para confirmado/recusado, ou se atualizou, marca a data de resposta
-    let respondedAt = originalGuest.respondedAt;
-    if (data.status !== 'pendente' && originalGuest.status === 'pendente') {
-      respondedAt = new Date();
-    } else if (data.status === 'pendente') {
-      respondedAt = null;
-    }
+    const members = data.familyMembers ?? [];
+    const counts = members.length > 0
+      ? countFromMembers(members, data.status)
+      : {
+          adultsCount:   data.status === 'confirmado' ? (data.adultsCount ?? 1) : 0,
+          childrenCount: data.status === 'confirmado' ? (data.childrenCount ?? 0) : 0,
+        };
+
+    let respondedAt = original.respondedAt;
+    if (data.status !== 'pendente' && original.status === 'pendente') respondedAt = new Date();
+    if (data.status === 'pendente') respondedAt = null;
 
     await db.guest.update({
       where: { id },
       data: {
-        name: data.name.trim(),
-        phone: data.phone?.trim() || '',
-        adultsCount: data.status === 'confirmado' ? Math.max(1, data.adultsCount) : 0,
-        childrenCount: data.status === 'confirmado' ? Math.max(0, data.childrenCount) : 0,
-        status: data.status,
-        notes: data.notes?.trim() || '',
+        name:          data.name.trim(),
+        phone:         data.phone?.trim() || '',
+        status:        data.status,
+        notes:         data.notes?.trim() || '',
+        familyMembers: members.length > 0 ? JSON.stringify(members) : null,
+        adultsCount:   counts.adultsCount,
+        childrenCount: counts.childrenCount,
         respondedAt,
       },
     });
 
-    revalidatePath('/admin/convidados');
-    revalidatePath('/admin/dashboard');
+    revalidateAll();
     return { success: true };
   } catch (error) {
     console.error('Erro ao editar convidado:', error);
     return { success: false, error: 'Erro ao editar convidado.' };
+  }
+}
+
+export async function deleteGuest(id: string) {
+  try {
+    await db.guest.delete({ where: { id } });
+    revalidateAll();
+    return { success: true };
+  } catch (error) {
+    console.error('Erro ao deletar convidado:', error);
+    return { success: false, error: 'Erro ao deletar convidado.' };
   }
 }

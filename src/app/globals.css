@@ -96,6 +96,51 @@ body {
   border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
+/* ─── Invite public pages ─── */
+
+/* Gingham plaid background */
+.gingham-bg {
+  background-color: #fff8f9;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 19px,
+      rgba(232, 138, 156, 0.13) 19px,
+      rgba(232, 138, 156, 0.13) 20px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 19px,
+      rgba(232, 138, 156, 0.13) 19px,
+      rgba(232, 138, 156, 0.13) 20px
+    );
+}
+
+/* Name shimmer glow */
+@keyframes shimmer-name {
+  0%, 100% { text-shadow: 0 2px 8px rgba(230, 138, 156, 0.35); }
+  50%       { text-shadow: 0 2px 24px rgba(230, 138, 156, 0.75), 0 0 40px rgba(212, 175, 55, 0.2); }
+}
+.animate-name-shimmer { animation: shimmer-name 3.5s ease-in-out infinite; }
+
+/* Bow gentle sway */
+@keyframes bow-bounce {
+  0%, 100% { transform: translateY(0) rotate(-4deg) scale(1); }
+  50%       { transform: translateY(-5px) rotate(4deg) scale(1.08); }
+}
+.animate-bow { animation: bow-bounce 2.8s ease-in-out infinite; }
+
+/* Floating stars */
+@keyframes star-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.5; }
+  50%       { transform: translateY(-12px) rotate(20deg); opacity: 1; }
+}
+.animate-star-1 { animation: star-float 4s ease-in-out infinite; }
+.animate-star-2 { animation: star-float 5.5s ease-in-out infinite 1.2s; }
+.animate-star-3 { animation: star-float 3.8s ease-in-out infinite 2.4s; }
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;

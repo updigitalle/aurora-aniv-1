@@ -7,65 +7,57 @@ interface CountdownProps {
 }
 
 export default function Countdown({ targetDate }: CountdownProps) {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-    isExpired: false,
-  });
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: false });
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const calculateTimeLeft = () => {
-      const difference = new Date(targetDate).getTime() - new Date().getTime();
-      
-      if (difference <= 0) {
+    setMounted(true);
+    const calculate = () => {
+      const diff = new Date(targetDate).getTime() - Date.now();
+      if (diff <= 0) {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true });
         return;
       }
-
       setTimeLeft({
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
+        days:    Math.floor(diff / 86400000),
+        hours:   Math.floor((diff / 3600000) % 24),
+        minutes: Math.floor((diff / 60000) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
         isExpired: false,
       });
     };
-
-    calculateTimeLeft();
-    const timer = setInterval(calculateTimeLeft, 1000);
-
+    calculate();
+    const timer = setInterval(calculate, 1000);
     return () => clearInterval(timer);
   }, [targetDate]);
 
+  if (!mounted) return null;
+
   if (timeLeft.isExpired) {
     return (
-      <div className="text-center py-4 bg-white/40 backdrop-blur-md rounded-2xl border border-princess-pink/10 max-w-sm mx-auto">
-        <span className="font-serif-display font-bold text-xl text-princess-rose">O grande dia chegou! 🎉</span>
-      </div>
+      <p className="font-serif-display italic text-princess-rose font-bold text-sm animate-pulse">
+        ✨ O grande dia chegou! ✨
+      </p>
     );
   }
 
   const items = [
-    { label: 'dias', value: timeLeft.days },
+    { label: 'dias',  value: timeLeft.days },
     { label: 'horas', value: timeLeft.hours },
-    { label: 'min', value: timeLeft.minutes },
-    { label: 'seg', value: timeLeft.seconds },
+    { label: 'min',   value: timeLeft.minutes },
+    { label: 'seg',   value: timeLeft.seconds },
   ];
 
   return (
-    <div className="flex justify-center items-center gap-3 max-w-md mx-auto">
-      {items.map((item, idx) => (
-        <div
-          key={idx}
-          className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/70 backdrop-blur-sm border border-princess-pink/20 shadow-sm flex flex-col items-center justify-center animate-float"
-          style={{ animationDelay: `${idx * 0.4}s` }}
-        >
-          <span className="font-serif-display text-lg md:text-xl font-bold text-princess-rose">
-            {item.value.toString().padStart(2, '0')}
-          </span>
-          <span className="text-[10px] md:text-xs text-princess-text/60 uppercase tracking-wider mt-0.5 font-semibold">
+    <div className="grid grid-cols-4 gap-2 max-w-[260px] mx-auto">
+      {items.map((item, i) => (
+        <div key={i} className="flex flex-col items-center gap-1">
+          <div className="w-full rounded-xl bg-princess-pink-light/70 border border-princess-rose/15 py-2 text-center">
+            <span className="font-serif-display text-[17px] font-bold text-princess-rose leading-none">
+              {item.value.toString().padStart(2, '0')}
+            </span>
+          </div>
+          <span className="text-[9px] font-bold tracking-wider text-princess-text/45 uppercase">
             {item.label}
           </span>
         </div>

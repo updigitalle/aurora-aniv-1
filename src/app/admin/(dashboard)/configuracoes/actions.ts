@@ -9,12 +9,13 @@ export async function updateEventConfig(
     name: string;
     babyName: string;
     slug: string;
-    date: string; // ISO String from form
+    date: string;
     locationName: string;
     locationAddress: string;
     locationMapUrl?: string;
     description?: string;
     bgImage?: string;
+    giftSuggestions?: string;
   }
 ) {
   try {
@@ -22,18 +23,13 @@ export async function updateEventConfig(
       return { success: false, error: 'Nome do evento, nome do bebê e link (slug) são obrigatórios.' };
     }
 
-    // Validar slug formato (apenas letras, números, hífen)
     const slugRegex = /^[a-z0-9-]+$/;
     if (!slugRegex.test(data.slug.trim())) {
       return { success: false, error: 'O link (slug) deve conter apenas letras minúsculas, números e hífens.' };
     }
 
-    // Verificar se o slug já está sendo usado por outro evento
     const existingSlug = await db.event.findFirst({
-      where: {
-        slug: data.slug.trim(),
-        NOT: { id },
-      },
+      where: { slug: data.slug.trim(), NOT: { id } },
     });
 
     if (existingSlug) {
@@ -52,6 +48,7 @@ export async function updateEventConfig(
         locationMapUrl: data.locationMapUrl?.trim() || '',
         description: data.description?.trim() || '',
         bgImage: data.bgImage?.trim() || '',
+        giftSuggestions: data.giftSuggestions?.trim() || '',
       },
     });
 
@@ -59,7 +56,7 @@ export async function updateEventConfig(
     revalidatePath('/admin/dashboard');
     revalidatePath(`/convite/${data.slug.trim()}`);
     revalidatePath(`/convite/${data.slug.trim()}/rsvp`);
-    
+
     return { success: true };
   } catch (error) {
     console.error('Erro ao atualizar configurações do evento:', error);
