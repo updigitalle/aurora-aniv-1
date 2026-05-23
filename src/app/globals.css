@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-princess-pink-light: #FFF2F5;
+  --color-princess-pink: #FFC0CB;
+  --color-princess-pink-dark: #FF99AA;
+  --color-princess-rose: #E68A9C;
+  --color-princess-gold: #D4AF37;
+  --color-princess-gold-light: #F6E6C2;
+  --color-princess-gold-dark: #AA7C11;
+  --color-princess-lavender: #F0F0FF;
+  --color-princess-lilac: #E8D3E8;
+  --color-princess-cream: #FAF9F6;
+  --color-princess-peach: #FFE5D9;
+  --color-princess-sky: #E8F5E9;
+  --color-princess-text: #4A353A;
+  
+  --font-serif-display: 'Playfair Display', Georgia, serif;
+  --font-script: 'Great Vibes', cursive;
+  --font-sans: 'Outfit', sans-serif;
+}
+
+body {
+  background-color: #FAF9F6; /* princess-cream */
+  color: #4A353A; /* princess-text */
+  font-family: 'Outfit', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom Gradients */
+.princess-gradient {
+  background: linear-gradient(135deg, #FFF2F5 0%, #FFF9FA 40%, #F0F0FF 100%);
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, #F6E6C2 0%, #D4AF37 50%, #AA7C11 100%);
+}
+
+.magic-btn-gradient {
+  background: linear-gradient(135deg, #E68A9C 0%, #FF99AA 100%);
+}
+
+.magic-btn-gradient-hover {
+  background: linear-gradient(135deg, #FF99AA 0%, #E68A9C 100%);
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.3); }
+  50% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.6); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 3s infinite;
+}
+
+.animate-sparkle-1 {
+  animation: sparkle 2.5s infinite;
+}
+
+.animate-sparkle-2 {
+  animation: sparkle 3.5s infinite 1s;
+}
+
+/* Custom Styles */
+.princess-card-shadow {
+  box-shadow: 0 12px 30px -8px rgba(230, 138, 156, 0.15);
+}
+
+.princess-card-shadow-hover {
+  transition: all 0.3s ease;
+}
+.princess-card-shadow-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -12px rgba(230, 138, 156, 0.25);
+}
+
+.gold-border {
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFF2F5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E68A9C;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF99AA;
+}
