@@ -26,27 +26,29 @@ const fmtDateShort = (d: Date | null) =>
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 async function getData() {
-  const event = await db.event.findFirst({ orderBy: { date: 'asc' } });
+  try {
+    const event = await db.event.findFirst({ orderBy: { date: 'asc' } });
 
-  const guests = await db.guest.findMany({
-    where: event ? { eventId: event.id } : {},
-    orderBy: { respondedAt: 'desc' },
-  });
+    const [guests, tasks, expenses, vendors] = await Promise.all([
+      db.guest.findMany({
+        where: event ? { eventId: event.id } : {},
+        orderBy: { createdAt: 'desc' },
+      }),
+      db.task.findMany({ orderBy: { createdAt: 'asc' } }),
+      db.expense.findMany({
+        include: { vendor: { include: { payments: true } } },
+      }),
+      db.vendor.findMany({
+        include: { payments: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
 
-  const tasks = await db.task.findMany({ orderBy: { createdAt: 'asc' } });
-
-  const expenses = await db.expense.findMany({
-    include: {
-      vendor: { include: { payments: true } },
-    },
-  });
-
-  const vendors = await db.vendor.findMany({
-    include: { payments: true },
-    orderBy: { createdAt: 'desc' },
-  });
-
-  return { event, guests, tasks, expenses, vendors };
+    return { event, guests, tasks, expenses, vendors };
+  } catch (err) {
+    console.error('[Dashboard] getData error:', err);
+    return { event: null, guests: [], tasks: [], expenses: [], vendors: [] };
+  }
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
