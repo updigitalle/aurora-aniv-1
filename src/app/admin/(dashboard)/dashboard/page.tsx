@@ -45,8 +45,11 @@ async function getData() {
     ]);
 
     return { event, guests, tasks, expenses, vendors };
-  } catch (err) {
-    console.error('[Dashboard] getData error:', err);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error('[Dashboard] getData FAILED:', msg);
+    if (stack) console.error('[Dashboard] stack:', stack);
     return { event: null, guests: [], tasks: [], expenses: [], vendors: [] };
   }
 }
