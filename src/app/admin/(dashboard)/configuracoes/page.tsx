@@ -2,7 +2,7 @@ import React from 'react';
 import { db } from '@/lib/db';
 import ConfigFormClient from './ConfigFormClient';
 
-export const revalidate = 0;
+export const revalidate = 30;
 
 export default async function ConfiguracoesPage() {
   let event = null as Awaited<ReturnType<typeof db.event.findFirst>>;

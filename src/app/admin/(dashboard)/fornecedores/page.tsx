@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import type { Prisma } from '@prisma/client';
 import VendorListClient from './VendorListClient';
 
-export const revalidate = 0;
+export const revalidate = 30;
 
 type VendorFull = Prisma.VendorGetPayload<{
   include: { expenses: true; payments: true };
