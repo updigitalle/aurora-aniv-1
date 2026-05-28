@@ -5,13 +5,19 @@ import TaskListClient from './TaskListClient';
 export const revalidate = 0;
 
 export default async function TarefasPage() {
-  const tasks = await db.task.findMany({
-    orderBy: [
-      { completed: 'asc' }, // não concluídas primeiro
-      { priority: 'asc' },  // alta -> media -> baixa (se ordenado alfabeticamente: alta, baixa, media, let's just let it sort or rely on date)
-      { createdAt: 'desc' },
-    ],
-  });
+  let tasks = [] as Awaited<ReturnType<typeof db.task.findMany>>;
+  try {
+    tasks = await db.task.findMany({
+      orderBy: [
+        { completed: 'asc' },
+        { priority: 'asc' },
+        { createdAt: 'desc' },
+      ],
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[Tarefas] DB error:', msg);
+  }
 
   // Custom sort to make sure: alta (1), media (2), baixa (3)
   const sortedTasks = [...tasks].sort((a, b) => {
