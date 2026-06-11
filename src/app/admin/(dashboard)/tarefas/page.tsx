@@ -2,7 +2,7 @@ import React from 'react';
 import { db } from '@/lib/db';
 import TaskListClient from './TaskListClient';
 
-export const revalidate = 0;
+export const revalidate = 30;
 
 export default async function TarefasPage() {
   let tasks = [] as Awaited<ReturnType<typeof db.task.findMany>>;

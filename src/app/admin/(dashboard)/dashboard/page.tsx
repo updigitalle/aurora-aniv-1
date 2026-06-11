@@ -7,7 +7,7 @@ import {
   Building2, Baby, User, TrendingUp, PartyPopper, Star,
 } from 'lucide-react';
 
-export const revalidate = 0;
+export const revalidate = 30;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

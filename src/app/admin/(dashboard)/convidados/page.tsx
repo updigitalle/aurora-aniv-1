@@ -2,7 +2,7 @@ import React from 'react';
 import { db } from '@/lib/db';
 import GuestListClient from './GuestListClient';
 
-export const revalidate = 0;
+export const revalidate = 30;
 
 export default async function ConvidadosPage() {
   let guests = [] as Awaited<ReturnType<typeof db.guest.findMany>>;

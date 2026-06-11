@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import type { Prisma } from '@prisma/client';
 import BudgetClient from './BudgetClient';
 
-export const revalidate = 0;
+export const revalidate = 30;
 
 type ExpenseFull = Prisma.ExpenseGetPayload<{
   include: { vendor: { include: { payments: true } } };
