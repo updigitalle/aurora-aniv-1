@@ -48,8 +48,22 @@ function normalizeUrl(raw: string): string {
 if (!process.env.DATABASE_URL) {
   console.error('[DB] ❌ DATABASE_URL is not set! Prisma will fail to connect.');
 } else {
-  const masked = normalizeUrl(process.env.DATABASE_URL).replace(/:([^@]+)@/, ':***@');
+  const raw = process.env.DATABASE_URL;
+  const masked = normalizeUrl(raw).replace(/:([^@]+)@/, ':***@');
   console.log('[DB] ✅ DATABASE_URL (normalizada):', masked);
+
+  // A conexão DIRETA do Supabase (host db.<ref>.supabase.co) só resolve em
+  // IPv6. As funções serverless da Vercel são IPv4, então NÃO conseguem
+  // alcançar esse host e o Prisma falha com "Can't reach database server".
+  // Em produção é obrigatório usar o Connection Pooler (host
+  // aws-0-<regiao>.pooler.supabase.com), que é compatível com IPv4.
+  if (/db\.[a-z0-9]+\.supabase\.co/i.test(raw)) {
+    console.error(
+      '[DB] ⚠️ DATABASE_URL usa a conexão DIRETA do Supabase (db.<ref>.supabase.co), ' +
+        'que é IPv6-only e NÃO funciona em serverless (Vercel). ' +
+        'Use a connection string do Pooler: aws-0-<regiao>.pooler.supabase.com.',
+    );
+  }
 }
 
 function buildClient() {
