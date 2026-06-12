@@ -48,7 +48,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
   const [fName,     setFName]     = useState('');
   const [fPhone,    setFPhone]    = useState('');
   const [fStatus,   setFStatus]   = useState('pendente');
-  const [fOrigin,   setFOrigin]   = useState('manual');
+  const [fOrigin,   setFOrigin]   = useState('rsvp_online');
   const [fNotes,    setFNotes]    = useState('');
   const [fMembers,  setFMembers]  = useState<FamilyMember[]>([]);
   const [fNewName,  setFNewName]  = useState('');
@@ -86,7 +86,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
   // ─── Modal helpers ────────────────────────────────────────────────────────
 
   const resetForm = () => {
-    setFName(''); setFPhone(''); setFStatus('pendente'); setFOrigin('manual');
+    setFName(''); setFPhone(''); setFStatus('pendente'); setFOrigin('rsvp_online');
     setFNotes(''); setFMembers([]); setFNewName(''); setFNewType('adulto');
     setFAdults(1); setFChildren(0); setFError('');
   };

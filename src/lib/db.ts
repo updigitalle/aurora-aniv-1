@@ -6,39 +6,46 @@ declare global {
 }
 
 /**
- * Normaliza a connection string para o Supabase.
+ * Normaliza a connection string do Supabase para serverless (Vercel).
  *
- * O pooler em modo TRANSAÇÃO (porta 6543) não suporta prepared statements
- * e, em serverless, causa erros intermitentes `Invalid \`prisma...\`` e
- * timeouts de pool (a página fica 15 s tentando pegar conexão).
+ * Em serverless o modo correto é o pooler em MODO TRANSAÇÃO (porta 6543)
+ * com `pgbouncer=true`. Esse modo multiplexa conexões e suporta centenas de
+ * clientes simultâneos — ideal para várias lambdas concorrentes.
  *
- * O pooler em modo SESSÃO (porta 5432) suporta tudo que o Prisma precisa
- * e é estável em serverless para 1 usuário. Então, se a DATABASE_URL
- * apontar para 6543, reescrevemos para 5432 e removemos `pgbouncer=true`.
- * A senha continua vindo da variável de ambiente — nada é hardcoded aqui.
+ * O modo SESSÃO (porta 5432) segura uma conexão dedicada por cliente e o
+ * limite é o pool_size (15). Com o dashboard fazendo queries em paralelo,
+ * isso estoura rápido e gera o erro `EMAXCONNSESSION: max clients reached
+ * in session mode`. Por isso forçamos o pooler para 6543 + pgbouncer=true.
+ *
+ * `pgbouncer=true` faz o Prisma desligar prepared statements, que é o que o
+ * pooler de transação exige — sem isso dá erro `prepared statement already
+ * exists`. A senha continua vindo da env — nada é hardcoded aqui.
  */
 function normalizeUrl(raw: string): string {
   if (!raw) return raw;
 
   let url = raw;
 
-  // Pooler de transação (6543) → pooler de sessão (5432)
-  if (url.includes('pooler.supabase.com:6543')) {
-    url = url.replace('pooler.supabase.com:6543', 'pooler.supabase.com:5432');
-    // pgbouncer=true só faz sentido no modo transação; remove no modo sessão
-    url = url.replace(/([?&])pgbouncer=true&?/i, (_m, sep) => (sep === '?' ? '?' : '&'));
-    url = url.replace(/[?&]$/,'');
+  // Pooler do Supabase: garante MODO TRANSAÇÃO (6543).
+  if (url.includes('pooler.supabase.com')) {
+    // Sessão (5432) → Transação (6543)
+    url = url.replace('pooler.supabase.com:5432', 'pooler.supabase.com:6543');
+
+    // pgbouncer=true é obrigatório no modo transação com Prisma
+    if (!/[?&]pgbouncer=true/i.test(url)) {
+      url += (url.includes('?') ? '&' : '?') + 'pgbouncer=true';
+    }
   }
 
-  // connection_limit=1 por instância serverless (modo sessão segura a conexão)
-  if (!url.includes('connection_limit')) {
+  // 1 conexão por instância serverless (o pooler de transação multiplexa).
+  if (!/[?&]connection_limit=/i.test(url)) {
     url += (url.includes('?') ? '&' : '?') + 'connection_limit=1';
   }
-  // Falha rápido em vez de pendurar
-  if (!url.includes('connect_timeout')) {
+  // Falha rápido em vez de pendurar.
+  if (!/[?&]connect_timeout=/i.test(url)) {
     url += '&connect_timeout=10';
   }
-  if (!url.includes('pool_timeout')) {
+  if (!/[?&]pool_timeout=/i.test(url)) {
     url += '&pool_timeout=10';
   }
 
@@ -56,12 +63,12 @@ if (!process.env.DATABASE_URL) {
   // IPv6. As funções serverless da Vercel são IPv4, então NÃO conseguem
   // alcançar esse host e o Prisma falha com "Can't reach database server".
   // Em produção é obrigatório usar o Connection Pooler (host
-  // aws-0-<regiao>.pooler.supabase.com), que é compatível com IPv4.
+  // aws-N-<regiao>.pooler.supabase.com), que é compatível com IPv4.
   if (/db\.[a-z0-9]+\.supabase\.co/i.test(raw)) {
     console.error(
       '[DB] ⚠️ DATABASE_URL usa a conexão DIRETA do Supabase (db.<ref>.supabase.co), ' +
         'que é IPv6-only e NÃO funciona em serverless (Vercel). ' +
-        'Use a connection string do Pooler: aws-0-<regiao>.pooler.supabase.com.',
+        'Use a connection string do Pooler: aws-N-<regiao>.pooler.supabase.com:6543.',
     );
   }
 }
