@@ -52,7 +52,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
   const [fNotes,    setFNotes]    = useState('');
   const [fMembers,  setFMembers]  = useState<FamilyMember[]>([]);
   const [fNewName,  setFNewName]  = useState('');
-  const [fNewType,  setFNewType]  = useState<'adulto' | 'crianca'>('adulto');
+  const [fNewType,  setFNewType]  = useState<'adulto' | 'crianca' | 'bebe'>('adulto');
   // Contagens manuais (quando não há membros)
   const [fAdults,   setFAdults]   = useState(1);
   const [fChildren, setFChildren] = useState(0);
@@ -117,6 +117,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
 
   const memberAdults   = fMembers.filter(m => m.type === 'adulto').length;
   const memberChildren = fMembers.filter(m => m.type === 'crianca').length;
+  const memberBabies   = fMembers.filter(m => m.type === 'bebe').length;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -525,6 +526,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                   {fMembers.length > 0 && (
                     <span className="text-[11px] text-princess-text/50">
                       {memberAdults} adulto{memberAdults !== 1 ? 's' : ''} · {memberChildren} criança{memberChildren !== 1 ? 's' : ''}
+                      {memberBabies > 0 && <> · {memberBabies} bebê{memberBabies !== 1 ? 's' : ''}</>}
                     </span>
                   )}
                 </div>
@@ -559,10 +561,11 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                     onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addMember())}
                     placeholder="Nome do membro..."
                     className="flex-1 px-3 py-2 bg-white border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
-                  <select value={fNewType} onChange={e => setFNewType(e.target.value as 'adulto' | 'crianca')}
+                  <select value={fNewType} onChange={e => setFNewType(e.target.value as 'adulto' | 'crianca' | 'bebe')}
                     className="px-2 py-2 bg-white border border-princess-rose/20 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-princess-rose/30 font-medium text-princess-text/70">
                     <option value="adulto">Adulto</option>
                     <option value="crianca">Criança</option>
+                    <option value="bebe">Bebê</option>
                   </select>
                   <button type="button" onClick={addMember}
                     className="px-3 py-2 bg-princess-rose hover:opacity-90 text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
@@ -570,7 +573,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                   </button>
                 </div>
                 <p className="text-[11px] text-princess-text/45">
-                  Clique em um membro para marcar/desmarcar presença. Os totais de adultos e crianças são calculados automaticamente.
+                  Clique em um membro para marcar/desmarcar presença. Os totais de adultos e crianças são calculados automaticamente. Bebês não entram na contagem de vagas.
                 </p>
               </div>
 

@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 
 export type FamilyMember = {
   name: string;
-  type: 'adulto' | 'crianca';
+  type: 'adulto' | 'crianca' | 'bebe';
   confirmed: boolean;
 };
 
