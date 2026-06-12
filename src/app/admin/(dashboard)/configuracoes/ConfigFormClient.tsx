@@ -334,7 +334,7 @@ export default function ConfigFormClient({ event }: ConfigFormClientProps) {
           <Laptop size={18} className="text-princess-rose" /> Prévia do Convite
         </h3>
 
-        <div className="bg-gradient-to-b from-[#FFF2F5] via-[#FFF9FA] to-[#F0F0FF] rounded-3xl p-6 border border-princess-pink/40 princess-card-shadow relative overflow-hidden text-center aspect-[9/16] max-h-[680px] flex flex-col justify-between">
+        <div className="bg-gradient-to-b from-[#F9EDEA] via-[#FBF8F1] to-[#EFF2E8] rounded-3xl p-6 border border-princess-pink/40 princess-card-shadow relative overflow-hidden text-center aspect-[9/16] max-h-[680px] flex flex-col justify-between">
           {/* Decorações */}
           <div className="absolute top-4 left-6 text-princess-pink animate-sparkle-1 opacity-40">
             <Crown size={28} />

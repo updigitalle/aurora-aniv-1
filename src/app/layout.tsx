@@ -3,8 +3,8 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Aniversário de 1 Ano da Aurora',
-  description: 'Organizador de aniversário e RSVP online da nossa princesinha Aurora.',
-  keywords: ['aniversário', 'Aurora', '1 ano', 'convite', 'RSVP', 'festa das princesas'],
+  description: 'Organizador de aniversário e RSVP online da Aurora no bosque encantado.',
+  keywords: ['aniversário', 'Aurora', '1 ano', 'convite', 'RSVP', 'bosque encantado'],
 };
 
 export default function RootLayout({

@@ -107,7 +107,7 @@ export default function RsvpFormClient({ slug, babyName }: RsvpFormClientProps) 
     const confirmado = done === 'confirmado';
     return (
       <div className="w-full max-w-xs bg-white/96 border-2 border-princess-rose/20 z-10"
-        style={{ borderRadius: '28px', boxShadow: '0 20px 60px -10px rgba(230,138,156,0.22)' }}>
+        style={{ borderRadius: '28px', boxShadow: '0 20px 60px -10px rgba(138,107,79,0.20)' }}>
         <div className="p-8 text-center space-y-5">
           <div className="flex justify-center">
             <div className={`w-16 h-16 rounded-full flex items-center justify-center animate-float border-2 ${
@@ -128,12 +128,12 @@ export default function RsvpFormClient({ slug, babyName }: RsvpFormClientProps) 
           </div>
           <p className="font-serif-display italic text-sm text-princess-text/70 leading-relaxed">
             {confirmado
-              ? <>Que alegria! Mal podemos esperar para celebrar o 1º aninho da <strong>Princesa {babyName}</strong> com você! 🎉👑</>
-              : <>Agradecemos sua resposta. A presença da <strong>Princesa {babyName}</strong> seguirá iluminando nosso reino! 💖</>}
+              ? <>Que alegria! O bosque encantado espera por você para celebrar o 1º aninho da <strong>{babyName}</strong>! 🦊🍄</>
+              : <>Agradecemos sua resposta. O bosque da <strong>{babyName}</strong> seguirá florescendo com seu carinho! 💖</>}
           </p>
           <Link href={`/convite/${slug}`}
             className="inline-flex items-center gap-1.5 w-full justify-center py-3 rounded-2xl text-white text-sm font-bold shadow-md transition-all hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #E68A9C, #FF99AA)' }}>
+            style={{ background: 'linear-gradient(135deg, #C16A52, #D98B6F)' }}>
             <ChevronLeft size={15} /> Voltar ao Convite
           </Link>
         </div>
@@ -145,7 +145,7 @@ export default function RsvpFormClient({ slug, babyName }: RsvpFormClientProps) 
   return (
     <>
       <div className="w-full max-w-xs bg-white/96 border-2 border-princess-rose/20 z-10 relative"
-        style={{ borderRadius: '28px', boxShadow: '0 20px 60px -10px rgba(230,138,156,0.22)' }}>
+        style={{ borderRadius: '28px', boxShadow: '0 20px 60px -10px rgba(138,107,79,0.20)' }}>
         <div className="absolute inset-[5px] border border-princess-rose/08 rounded-[24px] pointer-events-none" />
 
         <div className="p-6 space-y-5">
@@ -155,7 +155,7 @@ export default function RsvpFormClient({ slug, babyName }: RsvpFormClientProps) 
           </Link>
 
           <div className="text-center space-y-1.5">
-            <span className="text-2xl animate-bow inline-block select-none">🎀</span>
+            <span className="text-2xl animate-bow inline-block select-none">🍄</span>
             <h1 className="font-script text-4xl text-princess-rose leading-none">Confirmação</h1>
             <p className="text-[11px] font-bold tracking-[0.3em] text-princess-text/40 uppercase">de presença</p>
           </div>
@@ -221,7 +221,7 @@ export default function RsvpFormClient({ slug, babyName }: RsvpFormClientProps) 
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !loading && setSelected(null)} />
           <div className="relative z-10 w-full max-w-xs bg-white rounded-[28px] border-2 border-princess-rose/20 max-h-[90vh] overflow-y-auto"
-            style={{ boxShadow: '0 20px 60px -10px rgba(230,138,156,0.3)' }}>
+            style={{ boxShadow: '0 20px 60px -10px rgba(138,107,79,0.26)' }}>
             <div className="p-6 space-y-4">
               <button onClick={() => !loading && setSelected(null)}
                 className="absolute top-4 right-4 p-1.5 rounded-lg text-princess-rose hover:bg-princess-pink-light/30 transition">
@@ -229,7 +229,7 @@ export default function RsvpFormClient({ slug, babyName }: RsvpFormClientProps) 
               </button>
 
               <div className="text-center space-y-1 pt-1">
-                <span className="text-xl select-none">👑</span>
+                <span className="text-xl select-none">🦊</span>
                 <h2 className="font-script text-3xl text-princess-rose leading-tight">{selected.name}</h2>
                 {confirmingMembers.length > 0 && (
                   <p className="text-[11px] text-princess-text/50">
@@ -288,7 +288,7 @@ export default function RsvpFormClient({ slug, babyName }: RsvpFormClientProps) 
                 <button onClick={() => submit('confirmado')}
                   disabled={loading || (confirmingMembers.length > 0 && !anyChecked)}
                   className="w-full py-3 rounded-2xl text-white font-serif-display font-bold text-sm shadow-md transition-all hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg, #E68A9C, #FF99AA)' }}>
+                  style={{ background: 'linear-gradient(135deg, #C16A52, #D98B6F)' }}>
                   {loading ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
                   Confirmar presença
                 </button>

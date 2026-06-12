@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: RsvpPageProps): Promise<Metad
   const { slug } = await params;
   const event = await db.event.findUnique({ where: { slug } });
   return {
-    title: event ? `Confirmar Presença · 1 Ano da ${event.babyName} 👑` : 'RSVP',
+    title: event ? `Confirmar Presença · 1 Aninho da ${event.babyName} 🦊🍄` : 'RSVP',
     description: 'Confirme sua presença no aniversário!',
   };
 }
@@ -32,7 +32,7 @@ export default async function RsvpPage({ params }: RsvpPageProps) {
       <RsvpFormClient slug={slug} babyName={event.babyName} />
 
       <footer className="mt-7 text-center text-[10px] text-princess-rose/30 font-serif-display italic">
-        🏰 Celebrando um ano de pura magia.
+        🌲 O bosque encantado celebra um ano de pura magia.
       </footer>
     </main>
   );

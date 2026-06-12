@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Crown, Heart, Sparkles, Lock } from 'lucide-react';
+import { TreePine, Heart, Sparkles, Lock } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,7 +42,7 @@ export default function LoginPage() {
     <main className="min-h-screen w-full flex items-center justify-center princess-gradient p-4 relative overflow-hidden">
       {/* Decorative magical elements */}
       <div className="absolute top-10 left-10 text-princess-pink-dark animate-float opacity-30">
-        <Crown size={48} />
+        <TreePine size={48} />
       </div>
       <div className="absolute bottom-10 right-10 text-princess-gold animate-float opacity-30" style={{ animationDelay: '1.5s' }}>
         <Sparkles size={48} />
@@ -57,13 +57,13 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-2xl p-8 princess-card-shadow gold-border relative z-10">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-princess-pink-light gold-border text-princess-rose mb-3 animate-float">
-            <Crown size={32} className="text-princess-rose" />
+            <TreePine size={32} className="text-princess-rose" />
           </div>
           <h1 className="font-serif-display text-3xl font-bold text-princess-text">
             Painel da Aurora
           </h1>
           <p className="text-sm text-princess-text/70 mt-2">
-            Digite a senha mágica para organizar o reino
+            Digite a senha mágica para entrar no bosque
           </p>
         </div>
 

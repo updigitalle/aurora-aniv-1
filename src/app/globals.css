@@ -1,49 +1,66 @@
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Quicksand:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400..700;1,400..700&display=swap');
 @import "tailwindcss";
 
+/*
+ * ─── Tema: Bosque Encantado (aquarela) ───
+ * Paleta extraída da arte do convite: gingham bege, creme, laço rosa,
+ * terracota (Aurora), marrom (1 ANINHO), verde sálvia (árvore/texto),
+ * raposa caramelo e cogumelos vermelhos.
+ *
+ * Os nomes dos tokens `princess-*` foram mantidos por compatibilidade
+ * com todas as telas do painel — apenas os VALORES mudaram para o bosque.
+ */
 @theme {
-  --color-princess-pink-light: #FFF2F5;
-  --color-princess-pink: #FFC0CB;
-  --color-princess-pink-dark: #FF99AA;
-  --color-princess-rose: #E68A9C;
-  --color-princess-gold: #D4AF37;
-  --color-princess-gold-light: #F6E6C2;
-  --color-princess-gold-dark: #AA7C11;
-  --color-princess-lavender: #F0F0FF;
-  --color-princess-lilac: #E8D3E8;
-  --color-princess-cream: #FAF9F6;
-  --color-princess-peach: #FFE5D9;
-  --color-princess-sky: #E8F5E9;
-  --color-princess-text: #4A353A;
-  
-  --font-serif-display: 'Playfair Display', Georgia, serif;
+  --color-princess-pink-light: #F9EDEA;  /* blush de aquarela (fundos suaves) */
+  --color-princess-pink: #F2C4CE;        /* rosa do laço */
+  --color-princess-pink-dark: #DC93A4;   /* rosa do laço, sombra */
+  --color-princess-rose: #C16A52;        /* terracota "Aurora" (acento principal) */
+  --color-princess-gold: #B98A4C;        /* mel/outono (acentos secundários) */
+  --color-princess-gold-light: #F0E6D2;
+  --color-princess-gold-dark: #8A6534;
+  --color-princess-lavender: #EFF2E8;    /* sálvia clarinho */
+  --color-princess-lilac: #D8E0C9;       /* sálvia claro */
+  --color-princess-cream: #FBF8F1;       /* creme do painel central */
+  --color-princess-peach: #F6E3D3;
+  --color-princess-sky: #EAF0E1;         /* verde folha bem claro */
+  --color-princess-text: #4F3B2C;        /* marrom castanho */
+
+  /* Extras do bosque (novos tokens) */
+  --color-forest-sage: #8A9678;          /* verde sálvia (árvore, frases) */
+  --color-forest-sage-dark: #6F7D5C;
+  --color-forest-moss: #87A05E;          /* grama */
+  --color-forest-fox: #C8773E;           /* raposa */
+  --color-forest-bark: #8A6B4F;          /* tronco / corça */
+  --color-forest-berry: #B24A3F;         /* cogumelo */
+
+  --font-serif-display: 'Cormorant Garamond', Georgia, serif;
   --font-script: 'Great Vibes', cursive;
-  --font-sans: 'Outfit', sans-serif;
+  --font-sans: 'Quicksand', sans-serif;
 }
 
 body {
-  background-color: #FAF9F6; /* princess-cream */
-  color: #4A353A; /* princess-text */
-  font-family: 'Outfit', sans-serif;
+  background-color: #FBF8F1; /* creme do bosque */
+  color: #4F3B2C;
+  font-family: 'Quicksand', sans-serif;
   margin: 0;
   padding: 0;
 }
 
 /* Custom Gradients */
 .princess-gradient {
-  background: linear-gradient(135deg, #FFF2F5 0%, #FFF9FA 40%, #F0F0FF 100%);
+  background: linear-gradient(135deg, #F9EDEA 0%, #FBF8F1 45%, #EFF2E8 100%);
 }
 
 .gold-gradient {
-  background: linear-gradient(135deg, #F6E6C2 0%, #D4AF37 50%, #AA7C11 100%);
+  background: linear-gradient(135deg, #F0E6D2 0%, #B98A4C 50%, #8A6534 100%);
 }
 
 .magic-btn-gradient {
-  background: linear-gradient(135deg, #E68A9C 0%, #FF99AA 100%);
+  background: linear-gradient(135deg, #C16A52 0%, #D98B6F 100%);
 }
 
 .magic-btn-gradient-hover {
-  background: linear-gradient(135deg, #FF99AA 0%, #E68A9C 100%);
+  background: linear-gradient(135deg, #D98B6F 0%, #C16A52 100%);
 }
 
 /* Animations */
@@ -54,8 +71,8 @@ body {
 }
 
 @keyframes pulse-gold {
-  0%, 100% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.3); }
-  50% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.6); }
+  0%, 100% { box-shadow: 0 0 5px rgba(185, 138, 76, 0.3); }
+  50% { box-shadow: 0 0 15px rgba(185, 138, 76, 0.6); }
 }
 
 @keyframes sparkle {
@@ -81,7 +98,7 @@ body {
 
 /* Custom Styles */
 .princess-card-shadow {
-  box-shadow: 0 12px 30px -8px rgba(230, 138, 156, 0.15);
+  box-shadow: 0 12px 30px -8px rgba(138, 107, 79, 0.14);
 }
 
 .princess-card-shadow-hover {
@@ -89,50 +106,50 @@ body {
 }
 .princess-card-shadow-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 40px -12px rgba(230, 138, 156, 0.25);
+  box-shadow: 0 20px 40px -12px rgba(138, 107, 79, 0.22);
 }
 
 .gold-border {
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(185, 138, 76, 0.3);
 }
 
 /* ─── Invite public pages ─── */
 
-/* Gingham plaid background */
+/* Gingham bege da arte (xadrez grande, tom areia) */
 .gingham-bg {
-  background-color: #fff8f9;
+  background-color: #FCFAF5;
   background-image:
     repeating-linear-gradient(
       0deg,
-      transparent 0px,
-      transparent 19px,
-      rgba(232, 138, 156, 0.13) 19px,
-      rgba(232, 138, 156, 0.13) 20px
+      rgba(225, 211, 189, 0.45) 0px,
+      rgba(225, 211, 189, 0.45) 26px,
+      transparent 26px,
+      transparent 52px
     ),
     repeating-linear-gradient(
       90deg,
-      transparent 0px,
-      transparent 19px,
-      rgba(232, 138, 156, 0.13) 19px,
-      rgba(232, 138, 156, 0.13) 20px
+      rgba(225, 211, 189, 0.45) 0px,
+      rgba(225, 211, 189, 0.45) 26px,
+      transparent 26px,
+      transparent 52px
     );
 }
 
-/* Name shimmer glow */
+/* Name shimmer glow — terracota suave */
 @keyframes shimmer-name {
-  0%, 100% { text-shadow: 0 2px 8px rgba(230, 138, 156, 0.35); }
-  50%       { text-shadow: 0 2px 24px rgba(230, 138, 156, 0.75), 0 0 40px rgba(212, 175, 55, 0.2); }
+  0%, 100% { text-shadow: 0 2px 8px rgba(193, 106, 82, 0.30); }
+  50%       { text-shadow: 0 2px 22px rgba(193, 106, 82, 0.60), 0 0 38px rgba(185, 138, 76, 0.18); }
 }
 .animate-name-shimmer { animation: shimmer-name 3.5s ease-in-out infinite; }
 
 /* Bow gentle sway */
 @keyframes bow-bounce {
-  0%, 100% { transform: translateY(0) rotate(-4deg) scale(1); }
-  50%       { transform: translateY(-5px) rotate(4deg) scale(1.08); }
+  0%, 100% { transform: translateY(0) rotate(-3deg) scale(1); }
+  50%       { transform: translateY(-4px) rotate(3deg) scale(1.05); }
 }
-.animate-bow { animation: bow-bounce 2.8s ease-in-out infinite; }
+.animate-bow { animation: bow-bounce 3.2s ease-in-out infinite; transform-origin: 50% 20%; }
 
-/* Floating stars */
+/* Floating stars / leaves */
 @keyframes star-float {
   0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.5; }
   50%       { transform: translateY(-12px) rotate(20deg); opacity: 1; }
@@ -141,6 +158,74 @@ body {
 .animate-star-2 { animation: star-float 5.5s ease-in-out infinite 1.2s; }
 .animate-star-3 { animation: star-float 3.8s ease-in-out infinite 2.4s; }
 
+/* ─── Bosque: animações da arte viva ─── */
+
+/* Borboleta voando (deslocamento + batida de asa no filho) */
+@keyframes butterfly-drift {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  25%  { transform: translate(10px, -14px) rotate(8deg); }
+  50%  { transform: translate(-6px, -22px) rotate(-6deg); }
+  75%  { transform: translate(-14px, -8px) rotate(5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+.animate-butterfly-1 { animation: butterfly-drift 9s ease-in-out infinite; }
+.animate-butterfly-2 { animation: butterfly-drift 12s ease-in-out infinite reverse 1.5s; }
+.animate-butterfly-3 { animation: butterfly-drift 10.5s ease-in-out infinite 3s; }
+
+@keyframes wing-flap {
+  0%, 100% { transform: scaleX(1); }
+  50%      { transform: scaleX(0.45); }
+}
+.animate-wing { animation: wing-flap 0.55s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+
+/* Respiração suave dos bichinhos */
+@keyframes critter-breathe {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50%      { transform: scale(1.018) translateY(-1.5px); }
+}
+.animate-critter { animation: critter-breathe 4.5s ease-in-out infinite; transform-origin: 50% 100%; }
+.animate-critter-slow { animation: critter-breathe 6s ease-in-out infinite 1s; transform-origin: 50% 100%; }
+
+/* Cauda da raposa balançando */
+@keyframes tail-sway {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(7deg); }
+}
+.animate-tail { animation: tail-sway 3.4s ease-in-out infinite; transform-origin: 20% 80%; transform-box: fill-box; }
+
+/* Orelha da corça */
+@keyframes ear-twitch {
+  0%, 92%, 100% { transform: rotate(0deg); }
+  94%           { transform: rotate(-9deg); }
+  97%           { transform: rotate(3deg); }
+}
+.animate-ear { animation: ear-twitch 6.5s ease-in-out infinite; transform-origin: 80% 90%; transform-box: fill-box; }
+
+/* Árvore balançando de leve com a brisa */
+@keyframes tree-sway {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(1.4deg); }
+}
+.animate-tree { animation: tree-sway 7s ease-in-out infinite; transform-origin: 50% 100%; transform-box: fill-box; }
+
+/* Folha caindo */
+@keyframes leaf-fall {
+  0%   { transform: translate(0, -10px) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.9; }
+  90%  { opacity: 0.9; }
+  100% { transform: translate(-30px, 110px) rotate(320deg); opacity: 0; }
+}
+.animate-leaf-1 { animation: leaf-fall 11s linear infinite; }
+.animate-leaf-2 { animation: leaf-fall 14s linear infinite 4s; }
+.animate-leaf-3 { animation: leaf-fall 12.5s linear infinite 8s; }
+
+/* Entrada do cartão do convite */
+@keyframes card-rise {
+  from { transform: translateY(18px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.animate-card-rise { animation: card-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
@@ -148,14 +233,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #FFF2F5;
+  background: #F9EDEA;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E68A9C;
+  background: #C16A52;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #FF99AA;
+  background: #A8543F;
 }

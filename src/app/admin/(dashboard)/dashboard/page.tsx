@@ -110,7 +110,7 @@ export default async function DashboardPage() {
       {/* ════════════════════════════════════════════════════════════════════
           HERO — Título + Countdown
       ════════════════════════════════════════════════════════════════════ */}
-      <div className="relative bg-gradient-to-br from-[#FFF2F5] via-white to-[#F5F0FF] rounded-3xl p-6 md:p-8 border border-princess-pink/30 princess-card-shadow overflow-hidden">
+      <div className="relative bg-gradient-to-br from-[#F9EDEA] via-white to-[#EFF2E8] rounded-3xl p-6 md:p-8 border border-princess-pink/30 princess-card-shadow overflow-hidden">
         {/* Decorações de fundo */}
         <div className="absolute top-4 right-8 text-princess-pink/20 animate-sparkle-1 pointer-events-none">
           <Crown size={56} />

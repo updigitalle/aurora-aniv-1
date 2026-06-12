@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  Crown,
+  TreePine,
   LayoutDashboard,
   CheckSquare,
   Users,
@@ -79,11 +79,11 @@ export default function AdminLayout({
         {/* Brand / Logo */}
         <div className="p-6 border-b border-princess-pink-light flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-princess-pink-light flex items-center justify-center text-princess-rose">
-            <Crown size={22} />
+            <TreePine size={22} />
           </div>
           <div>
             <h1 className="font-serif-display font-bold text-lg text-princess-text leading-tight">1 Ano da Aurora</h1>
-            <p className="text-xs text-princess-text/50">Castelo da Princesa</p>
+            <p className="text-xs text-princess-text/50">Bosque Encantado</p>
           </div>
         </div>
 
@@ -115,7 +115,7 @@ export default function AdminLayout({
       <header className="md:hidden flex items-center justify-between px-6 py-4 bg-white border-b border-princess-pink-light z-20 sticky top-0">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-princess-pink-light flex items-center justify-center text-princess-rose">
-            <Crown size={18} />
+            <TreePine size={18} />
           </div>
           <h1 className="font-serif-display font-bold text-md text-princess-text">Aurora 1 Ano</h1>
         </div>
@@ -135,7 +135,7 @@ export default function AdminLayout({
             <div className="p-6 border-b border-princess-pink-light flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-princess-pink-light flex items-center justify-center text-princess-rose">
-                  <Crown size={22} />
+                  <TreePine size={22} />
                 </div>
                 <div>
                   <h1 className="font-serif-display font-bold text-lg text-princess-text leading-tight">Aurora 1 Ano</h1>

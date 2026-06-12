@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: PresentesPageProps): Promise<
   const event = await db.event.findUnique({ where: { slug } });
   return {
     title: event ? `Sugestões de Presentes · ${event.babyName} 🎁` : 'Presentes',
-    description: `Sugestões de presentes para o aniversário da ${event?.babyName ?? 'princesa'}`,
+    description: `Sugestões de presentes para o aniversário da ${event?.babyName ?? 'aniversariante'}`,
   };
 }
 
@@ -65,7 +65,7 @@ export default async function PresentesPage({ params }: PresentesPageProps) {
       {/* Card */}
       <div
         className="w-full max-w-xs bg-white/96 border-2 border-princess-gold/25 relative z-10"
-        style={{ borderRadius: '28px', boxShadow: '0 16px 50px -8px rgba(212,175,55,0.18), 0 4px 16px rgba(230,138,156,0.1)' }}
+        style={{ borderRadius: '28px', boxShadow: '0 16px 50px -8px rgba(212,175,55,0.18), 0 4px 16px rgba(138,107,79,0.1)' }}
       >
         {/* Gold inner ring */}
         <div className="absolute inset-[5px] border border-princess-gold/12 rounded-[24px] pointer-events-none" />
@@ -82,7 +82,7 @@ export default async function PresentesPage({ params }: PresentesPageProps) {
               Sugestões de Presentes
             </h1>
             <p className="text-[11px] font-bold tracking-[0.3em] text-princess-text/45 uppercase">
-              Para a princesa {event.babyName}
+              Para a {event.babyName}
             </p>
           </div>
 
@@ -118,14 +118,14 @@ export default async function PresentesPage({ params }: PresentesPageProps) {
 
           {/* Footer note */}
           <p className="font-serif-display italic text-[11px] text-princess-text/45 leading-relaxed">
-            "O seu presente mais precioso é a sua presença no nosso reino." 🏰
+            "O seu presente mais precioso é a sua presença no nosso bosque." 🌲
           </p>
 
           {/* CTA */}
           <Link
             href={`/convite/${slug}/rsvp`}
             className="block w-full py-3 rounded-2xl text-white text-sm font-bold font-serif-display tracking-wide shadow-md transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
-            style={{ background: 'linear-gradient(135deg, #E68A9C, #FF99AA)' }}
+            style={{ background: 'linear-gradient(135deg, #C16A52, #D98B6F)' }}
           >
             Confirmar Presença
           </Link>
@@ -133,7 +133,7 @@ export default async function PresentesPage({ params }: PresentesPageProps) {
       </div>
 
       <footer className="mt-7 text-center text-[10px] text-princess-rose/30 font-serif-display italic">
-        🎀 Com amor, família {event.babyName}
+        🍄 Com amor, família {event.babyName}
       </footer>
     </main>
   );
