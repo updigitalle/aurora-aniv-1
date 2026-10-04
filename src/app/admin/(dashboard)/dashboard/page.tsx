@@ -9,7 +9,9 @@ import {
   Building2, Baby, User, TrendingUp, PartyPopper,
 } from 'lucide-react';
 
-export const revalidate = 30;
+// Painel mostra dados ao vivo (RSVP, pagamentos): sem isso o Next gera a página no build
+// e serve uma versão em cache, e confirmações novas demoram a aparecer.
+export const dynamic = 'force-dynamic';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
