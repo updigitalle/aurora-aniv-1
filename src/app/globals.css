@@ -577,19 +577,6 @@ body {
   color: var(--convite-ink);
 }
 
-.rsvp-input-wrap { position: relative; }
-
-.rsvp-input-icon {
-  position: absolute;
-  left: 0.9rem;
-  top: 50%;
-  width: 1.15rem;
-  height: 1.15rem;
-  translate: 0 -50%;
-  color: var(--convite-olive);
-  pointer-events: none;
-}
-
 .rsvp-input {
   width: 100%;
   min-height: 3rem;
@@ -611,57 +598,6 @@ body {
   border-color: var(--convite-button);
   box-shadow: 0 0 0 4px rgb(111 122 82 / 0.18);
 }
-
-.rsvp-results {
-  display: grid;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-.rsvp-results:empty { margin-top: 0; }
-
-.rsvp-result {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  width: 100%;
-  min-height: 3.25rem;
-  padding: 0.65rem 0.9rem;
-  text-align: left;
-  background: #fff;
-  border: 1px solid rgb(139 148 104 / 0.3);
-  border-radius: 0.85rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.rsvp-result:hover { background: rgb(139 148 104 / 0.1); border-color: rgb(139 148 104 / 0.6); }
-.rsvp-result:active { transform: scale(0.99); }
-.rsvp-result:focus-visible { outline: 2px solid var(--convite-button); outline-offset: 2px; }
-
-.rsvp-result-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-family: var(--font-convite), serif;
-  font-size: 1.1rem;
-  color: var(--convite-ink);
-}
-
-.rsvp-result-arrow { flex-shrink: 0; color: var(--convite-olive); }
-
-.rsvp-badge {
-  flex-shrink: 0;
-  padding: 0.2rem 0.6rem;
-  font-family: var(--font-convite-detalhe), sans-serif;
-  font-size: 0.78rem;
-  border-radius: 999px;
-}
-
-.rsvp-badge.is-yes { color: #4f5a35; background: rgb(139 148 104 / 0.2); }
-.rsvp-badge.is-no { color: var(--convite-brown); background: rgb(130 95 81 / 0.12); }
 
 .rsvp-empty {
   margin: 0.25rem 0 0;
@@ -686,125 +622,6 @@ body {
 }
 
 .rsvp-done-ring svg { width: 2.1rem; height: 2.1rem; }
-
-/* Popup: bottom sheet no celular, dialogo centralizado a partir do tablet */
-.rsvp-dialog-root {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.rsvp-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgb(53 66 42 / 0.4);
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
-}
-
-.rsvp-dialog {
-  position: relative;
-  width: 100%;
-  text-align: left;
-  max-height: 92dvh;
-  overflow-y: auto;
-  padding: 1.75rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
-  background: #fbfaf6;
-  border-radius: 1.5rem 1.5rem 0 0;
-  box-shadow: 0 -12px 40px -16px rgb(53 66 42 / 0.4);
-}
-
-.rsvp-close {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  color: var(--convite-brown);
-  background: transparent;
-  border: 0;
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.rsvp-close:hover { background: rgb(139 148 104 / 0.14); }
-.rsvp-close:focus-visible { outline: 2px solid var(--convite-button); }
-
-.rsvp-dialog-title {
-  padding: 0 2.5rem;
-  font-size: 1.6rem;
-  font-weight: 400;
-  line-height: 1.2;
-  text-align: center;
-  color: var(--convite-sage);
-}
-
-.rsvp-dialog-sub {
-  margin: 0.35rem 0 1.25rem;
-  font-family: var(--font-convite-detalhe), sans-serif;
-  font-size: 0.92rem;
-  text-align: center;
-  color: var(--convite-brown);
-}
-
-.rsvp-members { display: grid; gap: 0.5rem; margin-bottom: 1.25rem; }
-
-.rsvp-member {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  width: 100%;
-  min-height: 3.25rem;
-  padding: 0.6rem 0.85rem;
-  text-align: left;
-  background: #fff;
-  border: 1.5px solid rgb(139 148 104 / 0.3);
-  border-radius: 0.85rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.rsvp-member.is-on { background: rgb(139 148 104 / 0.12); border-color: var(--convite-button); }
-.rsvp-member:focus-visible { outline: 2px solid var(--convite-button); outline-offset: 2px; }
-
-.rsvp-check {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 1.4rem;
-  height: 1.4rem;
-  color: #fbfaf6;
-  border: 2px solid rgb(111 122 82 / 0.5);
-  border-radius: 0.4rem;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.rsvp-member.is-on .rsvp-check { background: var(--convite-button); border-color: var(--convite-button); }
-
-.rsvp-member-icon { flex-shrink: 0; color: var(--convite-olive); }
-
-.rsvp-member-name {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-family: var(--font-convite), serif;
-  font-size: 1.05rem;
-  color: var(--convite-ink);
-}
-
-.rsvp-member-type {
-  flex-shrink: 0;
-  font-family: var(--font-convite-detalhe), sans-serif;
-  font-size: 0.78rem;
-  color: var(--convite-brown);
-}
 
 .rsvp-field { margin-bottom: 1rem; }
 
@@ -867,16 +684,6 @@ body {
   .rsvp-crest { width: 16rem; }
   .rsvp-garland { width: 22rem; }
   .rsvp-search { padding: 1.5rem; }
-
-  .rsvp-dialog-root { align-items: center; padding: 1.5rem; }
-
-  .rsvp-dialog {
-    max-width: 28rem;
-    max-height: 88dvh;
-    padding: 2rem 1.75rem 1.75rem;
-    border-radius: 1.5rem;
-    box-shadow: 0 30px 70px -20px rgb(53 66 42 / 0.45);
-  }
 }
 
 /* Desktop: brasao a esquerda, confirmacao a direita (mesma grade do convite) */
@@ -912,23 +719,9 @@ body {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .rsvp-result {
-    animation: convite-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 60ms) both;
-  }
-
-  .rsvp-overlay { animation: rsvp-fade 0.25s ease both; }
-  .rsvp-dialog { animation: rsvp-sheet-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
-
+  .rsvp-person { animation: convite-rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
   .rsvp-done-ring { animation: convite-crest-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both; }
 }
-
-@media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
-  .rsvp-dialog { animation-name: rsvp-pop; }
-}
-
-@keyframes rsvp-fade { from { opacity: 0; } }
-@keyframes rsvp-sheet-up { from { transform: translateY(100%); } }
-@keyframes rsvp-pop { from { opacity: 0; transform: translateY(12px) scale(0.96); } }
 
 .convite-map-link {
   color: inherit;
@@ -967,14 +760,114 @@ body {
   text-decoration: none;
 }
 
-/* Idade da criança no RSVP: aparece abaixo do membro marcado */
-.rsvp-member-block { display: grid; gap: 0.4rem; }
+/* Formulário do RSVP: cada pessoa num cartão com nome, adulto ou criança e idade */
+.rsvp-intro { margin-bottom: 1rem; color: var(--convite-brown); }
+
+.rsvp-people {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.rsvp-person {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.9rem;
+  background: #fff;
+  border: 1px solid rgb(139 148 104 / 0.3);
+  border-radius: 1rem;
+}
+
+.rsvp-person-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 2rem;
+}
+
+.rsvp-person-head .rsvp-label { margin-bottom: 0; }
+
+.rsvp-person-remove {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -0.6rem -0.6rem -0.6rem 0;
+  color: var(--convite-brown);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.rsvp-person-remove:hover { background: rgb(130 95 81 / 0.1); }
+.rsvp-person-remove:focus-visible { outline: 2px solid var(--convite-button); }
+
+.rsvp-type {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: rgb(139 148 104 / 0.1);
+  border-radius: 999px;
+}
+
+.rsvp-type-opt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 0.95rem;
+  color: var(--convite-ink);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.rsvp-type-opt.is-on { color: #fbfaf6; background: var(--convite-button); }
+.rsvp-type-opt:focus-visible { outline: 2px solid var(--convite-button); outline-offset: 2px; }
+
+.rsvp-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 3rem;
+  margin-bottom: 1.25rem;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 0.95rem;
+  color: var(--convite-button);
+  background: transparent;
+  border: 1.5px dashed rgb(111 122 82 / 0.55);
+  border-radius: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.rsvp-add:hover { background: rgb(139 148 104 / 0.1); }
+.rsvp-add:focus-visible { outline: 2px solid var(--convite-button); outline-offset: 2px; }
+
+/* Campo armadilha contra robôs: fora da tela */
+.rsvp-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
 
 .rsvp-age {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0 0.25rem 0.25rem 2.9rem;
+  padding: 0 0.25rem;
   font-family: var(--font-convite-detalhe), sans-serif;
   font-size: 0.9rem;
   color: var(--convite-brown);
