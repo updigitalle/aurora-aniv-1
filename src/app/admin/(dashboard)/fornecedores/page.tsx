@@ -3,7 +3,9 @@ import { db } from '@/lib/db';
 import type { Prisma } from '@prisma/client';
 import VendorListClient from './VendorListClient';
 
-export const revalidate = 30;
+// Painel mostra dados ao vivo (RSVP, pagamentos): sem isso o Next gera a página no build
+// e serve uma versão em cache, e confirmações novas demoram a aparecer.
+export const dynamic = 'force-dynamic';
 
 type VendorFull = Prisma.VendorGetPayload<{
   include: { expenses: true; payments: true };

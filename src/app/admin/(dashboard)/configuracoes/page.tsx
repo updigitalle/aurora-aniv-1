@@ -2,7 +2,9 @@ import React from 'react';
 import { db } from '@/lib/db';
 import ConfigFormClient from './ConfigFormClient';
 
-export const revalidate = 30;
+// Painel mostra dados ao vivo (RSVP, pagamentos): sem isso o Next gera a página no build
+// e serve uma versão em cache, e confirmações novas demoram a aparecer.
+export const dynamic = 'force-dynamic';
 
 export default async function ConfiguracoesPage() {
   let event = null as Awaited<ReturnType<typeof db.event.findFirst>>;
