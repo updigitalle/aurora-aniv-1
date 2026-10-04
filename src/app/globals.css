@@ -1,246 +1,968 @@
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Quicksand:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400..700;1,400..700&display=swap');
 @import "tailwindcss";
 
 /*
- * ─── Tema: Bosque Encantado (aquarela) ───
- * Paleta extraída da arte do convite: gingham bege, creme, laço rosa,
- * terracota (Aurora), marrom (1 ANINHO), verde sálvia (árvore/texto),
- * raposa caramelo e cogumelos vermelhos.
+ * ─── Tema: Bosque Encantado ───
+ * Paleta tirada do convite em PDF: xadrez sálvia, verde-oliva, marrom e o
+ * vermelho dos cogumelos. Os nomes `princess-*` ficam por compatibilidade com
+ * todas as telas do painel; só os VALORES mudaram.
  *
- * Os nomes dos tokens `princess-*` foram mantidos por compatibilidade
- * com todas as telas do painel — apenas os VALORES mudaram para o bosque.
+ * Fontes (carregadas em app/layout.tsx via next/font):
+ *   --font-convite  Simonetta  títulos (mesma do convite)
+ *   --font-painel   Nunito     interface do painel (precisa de vários pesos)
  */
 @theme {
-  --color-princess-pink-light: #F9EDEA;  /* blush de aquarela (fundos suaves) */
-  --color-princess-pink: #F2C4CE;        /* rosa do laço */
-  --color-princess-pink-dark: #DC93A4;   /* rosa do laço, sombra */
-  --color-princess-rose: #C16A52;        /* terracota "Aurora" (acento principal) */
-  --color-princess-gold: #B98A4C;        /* mel/outono (acentos secundários) */
-  --color-princess-gold-light: #F0E6D2;
-  --color-princess-gold-dark: #8A6534;
-  --color-princess-lavender: #EFF2E8;    /* sálvia clarinho */
-  --color-princess-lilac: #D8E0C9;       /* sálvia claro */
-  --color-princess-cream: #FBF8F1;       /* creme do painel central */
-  --color-princess-peach: #F6E3D3;
-  --color-princess-sky: #EAF0E1;         /* verde folha bem claro */
-  --color-princess-text: #4F3B2C;        /* marrom castanho */
+  /* Neutros sálvia */
+  --color-princess-cream: #f0efeb;       /* fundo do xadrez */
+  --color-princess-lavender: #f4f4ef;    /* superfície levemente tingida */
+  --color-princess-pink-light: #ecede2;  /* sálvia bem claro: hovers, chips, divisórias */
+  --color-princess-pink: #d3d6bf;        /* faixa do xadrez: bordas */
+  --color-princess-lilac: #c9cdb1;
+  --color-princess-sky: #e7eadb;
+  --color-princess-peach: #f3ebe4;
 
-  /* Extras do bosque (novos tokens) */
-  --color-forest-sage: #8A9678;          /* verde sálvia (árvore, frases) */
-  --color-forest-sage-dark: #6F7D5C;
-  --color-forest-moss: #87A05E;          /* grama */
-  --color-forest-fox: #C8773E;           /* raposa */
-  --color-forest-bark: #8A6B4F;          /* tronco / corça */
-  --color-forest-berry: #B24A3F;         /* cogumelo */
+  /* Acento: verde-oliva do botão de confirmar do convite */
+  --color-princess-rose: #6f7a52;
+  --color-princess-pink-dark: #5d6744;   /* hover / pressionado do acento */
 
-  --font-serif-display: 'Cormorant Garamond', Georgia, serif;
-  --font-script: 'Great Vibes', cursive;
-  --font-sans: 'Quicksand', sans-serif;
+  /* Marrom dos detalhes do convite (data, horário, local) */
+  --color-princess-gold: #825f51;
+  --color-princess-gold-light: #f1e8e2;
+  --color-princess-gold-dark: #6a4b3f;
+
+  /* Texto: verde-musgo escuro do convite */
+  --color-princess-text: #35422a;
+
+  /* Extras do bosque */
+  --color-forest-sage: #7b8b6c;          /* títulos em sálvia */
+  --color-forest-sage-dark: #5f6d52;
+  --color-forest-olive: #8b9468;         /* ícones */
+  --color-forest-berry: #b5473a;         /* vermelho dos cogumelos */
+
+  --font-serif-display: var(--font-convite), Georgia, serif;
+  --font-script: var(--font-convite), Georgia, serif;
+  --font-sans: var(--font-painel), ui-rounded, system-ui, sans-serif;
+}
+
+html {
+  background-color: #f0efeb;
 }
 
 body {
-  background-color: #FBF8F1; /* creme do bosque */
-  color: #4F3B2C;
-  font-family: 'Quicksand', sans-serif;
   margin: 0;
   padding: 0;
+  background-color: #f0efeb;
+  color: #35422a;
+  font-family: var(--font-painel), ui-rounded, system-ui, sans-serif;
 }
 
-/* Custom Gradients */
+/* Simonetta só tem peso 400: evita o negrito falso do navegador nos títulos */
+.font-serif-display,
+.font-script {
+  font-synthesis-weight: none;
+  letter-spacing: 0;
+}
+
+/* Xadrez sálvia do convite, reutilizável (painel e páginas públicas) */
+.gingham-bg {
+  --gingham: rgb(196 200 165 / 0.28);
+  background-color: #f0efeb;
+  background-image:
+    linear-gradient(90deg, var(--gingham) 50%, transparent 50%),
+    linear-gradient(var(--gingham) 50%, transparent 50%);
+  background-size: 44px 44px;
+}
+
+.gingham-soft {
+  --gingham: rgb(196 200 165 / 0.16);
+  background-color: #f3f2ee;
+  background-image:
+    linear-gradient(90deg, var(--gingham) 50%, transparent 50%),
+    linear-gradient(var(--gingham) 50%, transparent 50%);
+  background-size: 56px 56px;
+}
+
 .princess-gradient {
-  background: linear-gradient(135deg, #F9EDEA 0%, #FBF8F1 45%, #EFF2E8 100%);
+  background: linear-gradient(160deg, #f4f4ef 0%, #ecede2 100%);
 }
 
 .gold-gradient {
-  background: linear-gradient(135deg, #F0E6D2 0%, #B98A4C 50%, #8A6534 100%);
+  background: linear-gradient(135deg, #f1e8e2 0%, #825f51 100%);
 }
 
-.magic-btn-gradient {
-  background: linear-gradient(135deg, #C16A52 0%, #D98B6F 100%);
-}
-
+.magic-btn-gradient,
 .magic-btn-gradient-hover {
-  background: linear-gradient(135deg, #D98B6F 0%, #C16A52 100%);
+  background: #6f7a52;
 }
 
-/* Animations */
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
-  100% { transform: translateY(0px); }
+.magic-btn-gradient:hover {
+  background: #5d6744;
 }
 
-@keyframes pulse-gold {
-  0%, 100% { box-shadow: 0 0 5px rgba(185, 138, 76, 0.3); }
-  50% { box-shadow: 0 0 15px rgba(185, 138, 76, 0.6); }
-}
-
-@keyframes sparkle {
-  0%, 100% { opacity: 0.3; transform: scale(0.8); }
-  50% { opacity: 1; transform: scale(1.2); }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-.animate-pulse-gold {
-  animation: pulse-gold 3s infinite;
-}
-
-.animate-sparkle-1 {
-  animation: sparkle 2.5s infinite;
-}
-
-.animate-sparkle-2 {
-  animation: sparkle 3.5s infinite 1s;
-}
-
-/* Custom Styles */
 .princess-card-shadow {
-  box-shadow: 0 12px 30px -8px rgba(138, 107, 79, 0.14);
+  box-shadow: 0 1px 2px rgb(53 66 42 / 0.05), 0 12px 32px -14px rgb(53 66 42 / 0.18);
 }
 
 .princess-card-shadow-hover {
-  transition: all 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
 }
+
 .princess-card-shadow-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px -12px rgba(138, 107, 79, 0.22);
+  transform: translateY(-3px);
+  box-shadow: 0 2px 4px rgb(53 66 42 / 0.06), 0 22px 44px -18px rgb(53 66 42 / 0.28);
 }
 
 .gold-border {
-  border: 1px solid rgba(185, 138, 76, 0.3);
+  border: 1px solid rgb(139 148 104 / 0.3);
 }
 
-/* ─── Invite public pages ─── */
-
-/* Gingham bege da arte (xadrez grande, tom areia) */
-.gingham-bg {
-  background-color: #FCFAF5;
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      rgba(225, 211, 189, 0.45) 0px,
-      rgba(225, 211, 189, 0.45) 26px,
-      transparent 26px,
-      transparent 52px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(225, 211, 189, 0.45) 0px,
-      rgba(225, 211, 189, 0.45) 26px,
-      transparent 26px,
-      transparent 52px
-    );
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
-/* Name shimmer glow — terracota suave */
-@keyframes shimmer-name {
-  0%, 100% { text-shadow: 0 2px 8px rgba(193, 106, 82, 0.30); }
-  50%       { text-shadow: 0 2px 22px rgba(193, 106, 82, 0.60), 0 0 38px rgba(185, 138, 76, 0.18); }
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(111 122 82 / 0.25); }
+  50% { box-shadow: 0 0 0 6px rgb(111 122 82 / 0); }
 }
-.animate-name-shimmer { animation: shimmer-name 3.5s ease-in-out infinite; }
 
-/* Bow gentle sway */
-@keyframes bow-bounce {
-  0%, 100% { transform: translateY(0) rotate(-3deg) scale(1); }
-  50%       { transform: translateY(-4px) rotate(3deg) scale(1.05); }
+@keyframes sparkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.1); }
 }
-.animate-bow { animation: bow-bounce 3.2s ease-in-out infinite; transform-origin: 50% 20%; }
 
-/* Floating stars / leaves */
-@keyframes star-float {
-  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.5; }
-  50%       { transform: translateY(-12px) rotate(20deg); opacity: 1; }
+/* Entrada das telas do painel */
+@keyframes painel-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
 }
-.animate-star-1 { animation: star-float 4s ease-in-out infinite; }
-.animate-star-2 { animation: star-float 5.5s ease-in-out infinite 1.2s; }
-.animate-star-3 { animation: star-float 3.8s ease-in-out infinite 2.4s; }
 
-/* ─── Bosque: animações da arte viva ─── */
-
-/* Borboleta voando (deslocamento + batida de asa no filho) */
-@keyframes butterfly-drift {
-  0%   { transform: translate(0, 0) rotate(0deg); }
-  25%  { transform: translate(10px, -14px) rotate(8deg); }
-  50%  { transform: translate(-6px, -22px) rotate(-6deg); }
-  75%  { transform: translate(-14px, -8px) rotate(5deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
+@media (prefers-reduced-motion: no-preference) {
+  .animate-float { animation: float 4s ease-in-out infinite; }
+  .animate-pulse-gold { animation: pulse-gold 2.4s ease-in-out infinite; }
+  .animate-sparkle-1 { animation: sparkle 3s infinite; }
+  .animate-sparkle-2 { animation: sparkle 3.5s infinite 1s; }
+  .painel-enter { animation: painel-rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .painel-drawer { animation: painel-drawer-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
 }
-.animate-butterfly-1 { animation: butterfly-drift 9s ease-in-out infinite; }
-.animate-butterfly-2 { animation: butterfly-drift 12s ease-in-out infinite reverse 1.5s; }
-.animate-butterfly-3 { animation: butterfly-drift 10.5s ease-in-out infinite 3s; }
 
-@keyframes wing-flap {
-  0%, 100% { transform: scaleX(1); }
-  50%      { transform: scaleX(0.45); }
+@keyframes painel-drawer-in {
+  from { transform: translateX(-100%); }
 }
-.animate-wing { animation: wing-flap 0.55s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
 
-/* Respiração suave dos bichinhos */
-@keyframes critter-breathe {
-  0%, 100% { transform: scale(1) translateY(0); }
-  50%      { transform: scale(1.018) translateY(-1.5px); }
-}
-.animate-critter { animation: critter-breathe 4.5s ease-in-out infinite; transform-origin: 50% 100%; }
-.animate-critter-slow { animation: critter-breathe 6s ease-in-out infinite 1s; transform-origin: 50% 100%; }
-
-/* Cauda da raposa balançando */
-@keyframes tail-sway {
-  0%, 100% { transform: rotate(0deg); }
-  50%      { transform: rotate(7deg); }
-}
-.animate-tail { animation: tail-sway 3.4s ease-in-out infinite; transform-origin: 20% 80%; transform-box: fill-box; }
-
-/* Orelha da corça */
-@keyframes ear-twitch {
-  0%, 92%, 100% { transform: rotate(0deg); }
-  94%           { transform: rotate(-9deg); }
-  97%           { transform: rotate(3deg); }
-}
-.animate-ear { animation: ear-twitch 6.5s ease-in-out infinite; transform-origin: 80% 90%; transform-box: fill-box; }
-
-/* Árvore balançando de leve com a brisa */
-@keyframes tree-sway {
-  0%, 100% { transform: rotate(0deg); }
-  50%      { transform: rotate(1.4deg); }
-}
-.animate-tree { animation: tree-sway 7s ease-in-out infinite; transform-origin: 50% 100%; transform-box: fill-box; }
-
-/* Folha caindo */
-@keyframes leaf-fall {
-  0%   { transform: translate(0, -10px) rotate(0deg); opacity: 0; }
-  10%  { opacity: 0.9; }
-  90%  { opacity: 0.9; }
-  100% { transform: translate(-30px, 110px) rotate(320deg); opacity: 0; }
-}
-.animate-leaf-1 { animation: leaf-fall 11s linear infinite; }
-.animate-leaf-2 { animation: leaf-fall 14s linear infinite 4s; }
-.animate-leaf-3 { animation: leaf-fall 12.5s linear infinite 8s; }
-
-/* Entrada do cartão do convite */
-@keyframes card-rise {
-  from { transform: translateY(18px); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
-}
-.animate-card-rise { animation: card-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
-
-/* Scrollbar styling */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F9EDEA;
+  background: #ecede2;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #C16A52;
+  background: #b7bc9b;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #A8543F;
+  background: #8b9468;
+}
+
+/* ─── Convite público (réplica do convite em PDF) ───
+ * Mobile first. Breakpoints: 768px tablet, 1024px desktop (2 colunas), 1440px telas grandes.
+ */
+.convite-page {
+  --convite-ink: #35422a;
+  --convite-sage: #7b8b6c;
+  --convite-olive: #8b9468;
+  --convite-brown: #825f51;
+  --convite-button: #6f7a52;
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0efeb;
+  isolation: isolate;
+}
+
+/* Xadrez sálvia em camada fixa: faixas a 28% que escurecem no cruzamento, como o tecido */
+.convite-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  --gingham: rgb(196 200 165 / 0.28);
+  --gingham-size: 44px;
+  background-color: #f0efeb;
+  background-image:
+    linear-gradient(90deg, var(--gingham) 50%, transparent 50%),
+    linear-gradient(var(--gingham) 50%, transparent 50%);
+  background-size: var(--gingham-size) var(--gingham-size);
+  pointer-events: none;
+}
+
+.convite-sheet {
+  width: 100%;
+  max-width: 34rem;
+  padding: 2.25rem 1rem 3rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "intro"
+    "crest"
+    "title"
+    "info"
+    "thanks"
+    "garland"
+    "rsvp"
+    "cta";
+  justify-items: center;
+  text-align: center;
+}
+
+.convite-intro   { grid-area: intro; }
+.convite-crest   { grid-area: crest; }
+.convite-title   { grid-area: title; }
+.convite-info    { grid-area: info; }
+.convite-thanks  { grid-area: thanks; }
+.convite-garland { grid-area: garland; }
+.convite-rsvp    { grid-area: rsvp; }
+.convite-cta     { grid-area: cta; }
+
+.convite-text {
+  margin: 0;
+  font-family: var(--font-convite), serif;
+  color: var(--convite-ink);
+  text-wrap: balance;
+}
+
+.convite-intro {
+  max-width: 32ch;
+  font-size: clamp(0.95rem, 0.85rem + 0.5vw, 1.05rem);
+  line-height: 1.55;
+}
+
+.convite-crest {
+  width: min(82vw, 21rem);
+  margin: 1rem 0 1.25rem;
+}
+
+.convite-crest-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform-origin: 50% 12%;
+}
+
+.convite-title {
+  font-size: clamp(1.3rem, 1rem + 1.5vw, 1.6rem);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--convite-sage);
+}
+
+.convite-info {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  max-width: 27.5rem;
+  margin: 2rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.convite-info li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.25rem;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: clamp(0.74rem, 0.62rem + 0.6vw, 0.9rem);
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: var(--convite-brown);
+}
+
+.convite-info li + li {
+  border-left: 2px solid var(--convite-olive);
+}
+
+.convite-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--convite-olive);
+}
+
+.convite-thanks {
+  font-size: clamp(1.1rem, 0.95rem + 0.8vw, 1.3rem);
+  line-height: 1.45;
+}
+
+.convite-garland {
+  width: min(86vw, 24rem);
+  margin: 1.25rem 0 1rem;
+}
+
+.convite-garland-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.convite-rsvp {
+  font-size: clamp(1.15rem, 0.95rem + 1vw, 1.4rem);
+}
+
+.convite-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.convite-cta:focus-visible {
+  outline: 2px solid var(--convite-olive);
+  outline-offset: 6px;
+}
+
+.convite-cta-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 4px solid var(--convite-button);
+  border-radius: 999px;
+  color: var(--convite-button);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s ease, color 0.3s ease;
+}
+
+.convite-cta-ring svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.convite-cta:hover .convite-cta-ring,
+.convite-cta:focus-visible .convite-cta-ring {
+  transform: scale(1.08);
+  background-color: var(--convite-button);
+  color: #f4f5ef;
+}
+
+.convite-cta:active .convite-cta-ring {
+  transform: scale(0.94);
+}
+
+.convite-cta-label {
+  font-size: 0.9rem;
+}
+
+/* Tablet: mesma coluna, mais respiro e peças maiores */
+@media (min-width: 768px) {
+  .convite-page::before { --gingham-size: 56px; }
+
+  .convite-sheet {
+    max-width: 40rem;
+    padding: 3.5rem 2rem 4rem;
+  }
+
+  .convite-intro { max-width: 48ch; }
+  .convite-crest { width: 25rem; margin: 1.5rem 0 1.75rem; }
+  .convite-info { max-width: 32rem; margin: 2.5rem 0; }
+  .convite-icon { width: 2.9rem; height: 2.9rem; }
+  .convite-garland { width: 26rem; }
+}
+
+/* Desktop: brasão à esquerda na altura toda, texto do convite à direita */
+@media (min-width: 1024px) {
+  .convite-sheet {
+    max-width: 74rem;
+    min-height: 100dvh;
+    padding: 3rem;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-rows: repeat(7, auto);
+    grid-template-areas:
+      "crest intro"
+      "crest title"
+      "crest info"
+      "crest thanks"
+      "crest garland"
+      "crest rsvp"
+      "crest cta";
+    align-content: center;
+    column-gap: clamp(3rem, 5vw, 6rem);
+  }
+
+  .convite-crest {
+    width: min(100%, 34rem);
+    margin: 0;
+    align-self: center;
+    justify-self: end;
+  }
+
+  .convite-intro { max-width: 48ch; }
+  .convite-title { margin-top: 1.5rem; font-size: 1.75rem; }
+  .convite-info { margin: 2.25rem 0; }
+  .convite-garland { width: 24rem; margin: 1.25rem 0 0.75rem; }
+}
+
+@media (min-width: 1440px) {
+  .convite-page::before { --gingham-size: 64px; }
+  .convite-sheet { max-width: 82rem; }
+  .convite-crest { width: 38rem; }
+  .convite-intro { font-size: 1.15rem; }
+  .convite-title { font-size: 2rem; }
+  .convite-info { max-width: 34rem; }
+  .convite-info li { font-size: 1rem; }
+  .convite-icon { width: 3.2rem; height: 3.2rem; }
+  .convite-thanks { font-size: 1.45rem; }
+  .convite-garland { width: 27rem; }
+  .convite-rsvp { font-size: 1.6rem; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Entrada em sequência, como se o convite fosse sendo escrito de cima para baixo */
+  .convite-in {
+    animation: convite-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0ms) both;
+  }
+
+  .convite-crest.convite-in {
+    animation-name: convite-crest-in;
+    animation-duration: 1.2s;
+  }
+
+  /* O brasão balança de leve, pendurado pelo laço */
+  .convite-crest-img {
+    animation: convite-sway 7s ease-in-out 1.6s infinite;
+  }
+
+  /* A guirlanda se abre do cogumelo central para as pontas */
+  .convite-garland-img {
+    animation: convite-unfurl 1.4s cubic-bezier(0.65, 0, 0.35, 1) 1.1s both;
+  }
+
+  /* Um chamado suave no botão de confirmar */
+  .convite-cta-ring::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    border: 2px solid var(--convite-button);
+    animation: convite-ping 2.8s cubic-bezier(0, 0, 0.2, 1) 2.6s infinite;
+    pointer-events: none;
+  }
+}
+
+@keyframes convite-rise {
+  from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes convite-crest-in {
+  from { opacity: 0; transform: scale(0.88) translateY(10px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes convite-sway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(0.8deg); }
+  75% { transform: rotate(-0.8deg); }
+}
+
+@keyframes convite-unfurl {
+  from { clip-path: inset(0 50% 0 50%); opacity: 0.2; }
+  to { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+
+@keyframes convite-ping {
+  0% { transform: scale(1); opacity: 0.55; }
+  70%, 100% { transform: scale(1.55); opacity: 0; }
+}
+
+/* ─── RSVP (mesmo sistema visual do convite) ─── */
+.rsvp-sheet {
+  width: 100%;
+  max-width: 34rem;
+  padding: 1.25rem 1rem 3rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "back"
+    "crest"
+    "main";
+  justify-items: center;
+  align-content: start;
+  text-align: center;
+}
+
+.rsvp-crest { grid-area: crest; width: min(52vw, 13rem); margin: 0.75rem 0 0.5rem; }
+.rsvp-back  { grid-area: back; }
+.rsvp-main  { grid-area: main; }
+
+.rsvp-back {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 44px;
+  padding: 0 0.5rem 0 0.25rem;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 0.9rem;
+  color: var(--convite-brown);
+  text-decoration: none;
+  border-radius: 999px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.rsvp-back:hover { color: var(--convite-ink); background-color: rgb(139 148 104 / 0.12); }
+.rsvp-back:focus-visible { outline: 2px solid var(--convite-olive); outline-offset: 2px; }
+
+.rsvp-main {
+  width: 100%;
+  max-width: 28rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rsvp-title {
+  font-size: clamp(1.6rem, 1.2rem + 2vw, 2.1rem);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--convite-sage);
+}
+
+.rsvp-lead {
+  margin-top: 0.5rem;
+  max-width: 34ch;
+  font-size: clamp(1.02rem, 0.92rem + 0.5vw, 1.15rem);
+  line-height: 1.5;
+}
+
+.rsvp-note {
+  margin: 1rem 0 0;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 0.92rem;
+  color: var(--convite-brown);
+}
+
+.rsvp-garland { width: min(78vw, 20rem); margin: 1.25rem 0 1.5rem; }
+.rsvp-garland img { display: block; width: 100%; height: auto; }
+
+/* Painel de busca: fundo creme translúcido para leitura sobre o xadrez */
+.rsvp-search {
+  width: 100%;
+  padding: 1.25rem;
+  text-align: left;
+  background: rgb(251 250 246 / 0.88);
+  border: 1px solid rgb(139 148 104 / 0.35);
+  border-radius: 1.25rem;
+  box-shadow: 0 18px 40px -24px rgb(53 66 42 / 0.35);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.rsvp-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 0.92rem;
+  color: var(--convite-ink);
+}
+
+.rsvp-input-wrap { position: relative; }
+
+.rsvp-input-icon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  width: 1.15rem;
+  height: 1.15rem;
+  translate: 0 -50%;
+  color: var(--convite-olive);
+  pointer-events: none;
+}
+
+.rsvp-input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.7rem 1rem 0.7rem 2.6rem;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 1rem; /* 16px evita o zoom automatico do iOS */
+  color: var(--convite-ink);
+  background: #fff;
+  border: 1.5px solid rgb(139 148 104 / 0.45);
+  border-radius: 0.85rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rsvp-input-plain { padding-left: 1rem; }
+.rsvp-input::placeholder { color: rgb(53 66 42 / 0.45); }
+
+.rsvp-input:focus {
+  outline: none;
+  border-color: var(--convite-button);
+  box-shadow: 0 0 0 4px rgb(111 122 82 / 0.18);
+}
+
+.rsvp-results {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.rsvp-results:empty { margin-top: 0; }
+
+.rsvp-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.65rem 0.9rem;
+  text-align: left;
+  background: #fff;
+  border: 1px solid rgb(139 148 104 / 0.3);
+  border-radius: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.rsvp-result:hover { background: rgb(139 148 104 / 0.1); border-color: rgb(139 148 104 / 0.6); }
+.rsvp-result:active { transform: scale(0.99); }
+.rsvp-result:focus-visible { outline: 2px solid var(--convite-button); outline-offset: 2px; }
+
+.rsvp-result-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-convite), serif;
+  font-size: 1.1rem;
+  color: var(--convite-ink);
+}
+
+.rsvp-result-arrow { flex-shrink: 0; color: var(--convite-olive); }
+
+.rsvp-badge {
+  flex-shrink: 0;
+  padding: 0.2rem 0.6rem;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 0.78rem;
+  border-radius: 999px;
+}
+
+.rsvp-badge.is-yes { color: #4f5a35; background: rgb(139 148 104 / 0.2); }
+.rsvp-badge.is-no { color: var(--convite-brown); background: rgb(130 95 81 / 0.12); }
+
+.rsvp-empty {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--convite-brown);
+}
+
+/* Tela final */
+.rsvp-done { padding-top: 0.5rem; }
+
+.rsvp-done-ring {
+  display: grid;
+  place-items: center;
+  width: 4.25rem;
+  height: 4.25rem;
+  margin-bottom: 1rem;
+  border: 4px solid var(--convite-button);
+  border-radius: 999px;
+  color: var(--convite-button);
+}
+
+.rsvp-done-ring svg { width: 2.1rem; height: 2.1rem; }
+
+/* Popup: bottom sheet no celular, dialogo centralizado a partir do tablet */
+.rsvp-dialog-root {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.rsvp-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgb(53 66 42 / 0.4);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+.rsvp-dialog {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  max-height: 92dvh;
+  overflow-y: auto;
+  padding: 1.75rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
+  background: #fbfaf6;
+  border-radius: 1.5rem 1.5rem 0 0;
+  box-shadow: 0 -12px 40px -16px rgb(53 66 42 / 0.4);
+}
+
+.rsvp-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--convite-brown);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.rsvp-close:hover { background: rgb(139 148 104 / 0.14); }
+.rsvp-close:focus-visible { outline: 2px solid var(--convite-button); }
+
+.rsvp-dialog-title {
+  padding: 0 2.5rem;
+  font-size: 1.6rem;
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--convite-sage);
+}
+
+.rsvp-dialog-sub {
+  margin: 0.35rem 0 1.25rem;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 0.92rem;
+  text-align: center;
+  color: var(--convite-brown);
+}
+
+.rsvp-members { display: grid; gap: 0.5rem; margin-bottom: 1.25rem; }
+
+.rsvp-member {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.6rem 0.85rem;
+  text-align: left;
+  background: #fff;
+  border: 1.5px solid rgb(139 148 104 / 0.3);
+  border-radius: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.rsvp-member.is-on { background: rgb(139 148 104 / 0.12); border-color: var(--convite-button); }
+.rsvp-member:focus-visible { outline: 2px solid var(--convite-button); outline-offset: 2px; }
+
+.rsvp-check {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  color: #fbfaf6;
+  border: 2px solid rgb(111 122 82 / 0.5);
+  border-radius: 0.4rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.rsvp-member.is-on .rsvp-check { background: var(--convite-button); border-color: var(--convite-button); }
+
+.rsvp-member-icon { flex-shrink: 0; color: var(--convite-olive); }
+
+.rsvp-member-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-convite), serif;
+  font-size: 1.05rem;
+  color: var(--convite-ink);
+}
+
+.rsvp-member-type {
+  flex-shrink: 0;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 0.78rem;
+  color: var(--convite-brown);
+}
+
+.rsvp-field { margin-bottom: 1rem; }
+
+.rsvp-help {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 0.8rem;
+  color: rgb(53 66 42 / 0.65);
+}
+
+.rsvp-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.8rem;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 0.88rem;
+  color: #8a2f22;
+  background: #fbebe7;
+  border: 1px solid #efc6bc;
+  border-radius: 0.75rem;
+}
+
+.rsvp-error svg { flex-shrink: 0; margin-top: 0.1rem; }
+
+.rsvp-actions { display: grid; gap: 0.6rem; }
+
+.rsvp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3.1rem;
+  padding: 0 1.25rem;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+}
+
+.rsvp-btn:active:not(:disabled) { transform: scale(0.98); }
+.rsvp-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.rsvp-btn:focus-visible { outline: 2px solid var(--convite-button); outline-offset: 3px; }
+
+.rsvp-btn-primary { color: #fbfaf6; background: var(--convite-button); border: 0; }
+.rsvp-btn-primary:hover:not(:disabled) { background: #5d6744; }
+
+.rsvp-btn-ghost { color: var(--convite-brown); background: transparent; border: 1.5px solid rgb(130 95 81 / 0.35); }
+.rsvp-btn-ghost:hover:not(:disabled) { background: rgb(130 95 81 / 0.08); }
+
+.rsvp-spin { animation: rsvp-spin 0.9s linear infinite; }
+
+@keyframes rsvp-spin { to { rotate: 360deg; } }
+
+@media (min-width: 768px) {
+  .rsvp-sheet { max-width: 40rem; padding: 2rem 2rem 4rem; }
+  .rsvp-crest { width: 16rem; }
+  .rsvp-garland { width: 22rem; }
+  .rsvp-search { padding: 1.5rem; }
+
+  .rsvp-dialog-root { align-items: center; padding: 1.5rem; }
+
+  .rsvp-dialog {
+    max-width: 28rem;
+    max-height: 88dvh;
+    padding: 2rem 1.75rem 1.75rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 30px 70px -20px rgb(53 66 42 / 0.45);
+  }
+}
+
+/* Desktop: brasao a esquerda, confirmacao a direita (mesma grade do convite) */
+@media (min-width: 1024px) {
+  .rsvp-sheet {
+    max-width: 72rem;
+    min-height: 100dvh;
+    padding: 3rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "crest back"
+      "crest main";
+    align-content: center;
+    column-gap: clamp(3rem, 5vw, 6rem);
+  }
+
+  .rsvp-crest {
+    width: min(100%, 30rem);
+    margin: 0;
+    align-self: center;
+    justify-self: end;
+  }
+
+  .rsvp-back { justify-self: center; margin-bottom: 0.75rem; }
+  .rsvp-main { align-self: start; }
+}
+
+@media (min-width: 1440px) {
+  .rsvp-sheet { max-width: 80rem; }
+  .rsvp-crest { width: 34rem; }
+  .rsvp-main { max-width: 30rem; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rsvp-result {
+    animation: convite-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 60ms) both;
+  }
+
+  .rsvp-overlay { animation: rsvp-fade 0.25s ease both; }
+  .rsvp-dialog { animation: rsvp-sheet-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  .rsvp-done-ring { animation: convite-crest-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both; }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+  .rsvp-dialog { animation-name: rsvp-pop; }
+}
+
+@keyframes rsvp-fade { from { opacity: 0; } }
+@keyframes rsvp-sheet-up { from { transform: translateY(100%); } }
+@keyframes rsvp-pop { from { opacity: 0; transform: translateY(12px) scale(0.96); } }
+
+.convite-map-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── Sugestões de presentes (reaproveita a grade do RSVP) ─── */
+.presentes-list {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.presentes-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-family: var(--font-convite), serif;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  color: var(--convite-ink);
+}
+
+.presentes-icon {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  color: var(--convite-olive);
+}
+
+.presentes-cta {
+  width: 100%;
+  margin-top: 1.25rem;
+  text-decoration: none;
 }

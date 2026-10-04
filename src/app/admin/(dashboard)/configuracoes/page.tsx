@@ -14,7 +14,7 @@ export default async function ConfiguracoesPage() {
 
   if (!event) {
     return (
-      <div className="bg-red-50 text-red-600 p-6 rounded-2xl border border-red-200">
+      <div className="bg-[#f9ebe8] text-forest-berry p-6 rounded-2xl border border-[#ebc6be]">
         Nenhum evento encontrado. Configure a variável DATABASE_URL e recarregue.
       </div>
     );

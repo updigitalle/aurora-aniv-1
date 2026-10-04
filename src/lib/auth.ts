@@ -1,10 +1,10 @@
-import { SignJWT, jwtVerify } from 'jose';
+import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 
 const SECRET_KEY = new TextEncoder().encode(
   process.env.JWT_SECRET || 'fallback-secret-key-replace-in-env'
 );
 
-export async function encryptSession(payload: any) {
+export async function encryptSession(payload: JWTPayload) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -18,7 +18,7 @@ export async function decryptSession(token: string) {
       algorithms: ['HS256'],
     });
     return payload;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

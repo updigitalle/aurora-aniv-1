@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  TreePine,
   LayoutDashboard,
   CheckSquare,
   Users,
@@ -15,8 +15,38 @@ import {
   ExternalLink,
   Menu,
   X,
-  Heart
 } from 'lucide-react';
+
+const menuItems = [
+  { name: 'Resumo', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Checklist', href: '/admin/tarefas', icon: CheckSquare },
+  { name: 'Convidados', href: '/admin/convidados', icon: Users },
+  { name: 'Orçamento', href: '/admin/orcamento', icon: Wallet },
+  { name: 'Fornecedores', href: '/admin/fornecedores', icon: Building2 },
+  { name: 'Configurações', href: '/admin/configuracoes', icon: Settings },
+];
+
+function Brand({ size = 'lg' }: { size?: 'lg' | 'sm' }) {
+  const img = size === 'lg' ? 52 : 40;
+  return (
+    <div className="flex items-center gap-3 min-w-0">
+      <Image
+        src="/convite/brasao.webp"
+        alt=""
+        width={img}
+        height={img}
+        unoptimized
+        className="shrink-0 drop-shadow-sm"
+      />
+      <div className="min-w-0">
+        <p className="font-serif-display text-princess-text leading-tight text-lg whitespace-nowrap">
+          1 Aninho da Aurora
+        </p>
+        <p className="text-xs text-forest-sage-dark">Painel do bosque encantado</p>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminLayout({
   children,
@@ -28,14 +58,13 @@ export default function AdminLayout({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const menuItems = [
-    { name: 'Resumo', href: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'Checklist', href: '/admin/tarefas', icon: CheckSquare },
-    { name: 'Convidados', href: '/admin/convidados', icon: Users },
-    { name: 'Orçamento', href: '/admin/orcamento', icon: Wallet },
-    { name: 'Fornecedores', href: '/admin/fornecedores', icon: Building2 },
-    { name: 'Configurações', href: '/admin/configuracoes', icon: Settings },
-  ];
+  // Esc fecha o menu do celular
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileMenuOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [mobileMenuOpen]);
 
   const handleLogout = async () => {
     if (confirm('Deseja realmente sair do painel?')) {
@@ -59,128 +88,94 @@ export default function AdminLayout({
       <Link
         key={item.href}
         href={item.href}
+        aria-current={isActive ? 'page' : undefined}
         onClick={() => setMobileMenuOpen(false)}
-        className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition duration-200 ${
+        className={`flex items-center gap-3 min-h-11 px-4 rounded-full font-semibold text-[0.95rem] transition-colors duration-200 ${
           isActive
-            ? 'bg-gradient-to-r from-princess-rose to-princess-pink-dark text-white shadow-sm'
-            : 'text-princess-text/70 hover:bg-princess-pink-light hover:text-princess-rose'
+            ? 'bg-princess-rose text-white shadow-sm'
+            : 'text-princess-text/75 hover:bg-princess-pink-light hover:text-princess-text'
         }`}
       >
-        <Icon size={20} />
+        <Icon size={19} strokeWidth={isActive ? 2.2 : 1.8} />
         {item.name}
       </Link>
     );
   });
 
+  const footerActions = (
+    <>
+      <Link
+        href="/convite/aurora-1-ano"
+        target="_blank"
+        onClick={() => setMobileMenuOpen(false)}
+        className="flex items-center justify-center gap-2 w-full min-h-11 px-4 border border-princess-rose/40 text-princess-rose hover:bg-princess-pink-light font-semibold rounded-full text-sm transition-colors"
+      >
+        <ExternalLink size={16} />
+        Ver convite público
+      </Link>
+      <button
+        onClick={handleLogout}
+        disabled={loggingOut}
+        className="flex items-center justify-center gap-2 w-full min-h-11 px-4 text-princess-gold hover:bg-princess-gold-light font-semibold rounded-full text-sm transition-colors disabled:opacity-50"
+      >
+        <LogOut size={16} />
+        {loggingOut ? 'Saindo...' : 'Sair do painel'}
+      </button>
+    </>
+  );
+
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#FAF9F6] text-princess-text font-sans">
-      {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-princess-pink-light shrink-0">
-        {/* Brand / Logo */}
-        <div className="p-6 border-b border-princess-pink-light flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-princess-pink-light flex items-center justify-center text-princess-rose">
-            <TreePine size={22} />
-          </div>
-          <div>
-            <h1 className="font-serif-display font-bold text-lg text-princess-text leading-tight">1 Ano da Aurora</h1>
-            <p className="text-xs text-princess-text/50">Bosque Encantado</p>
-          </div>
+    <div className="min-h-dvh flex flex-col lg:flex-row gingham-soft text-princess-text font-sans">
+      {/* Menu lateral: desktop */}
+      <aside className="hidden lg:flex flex-col w-68 shrink-0 sticky top-0 h-dvh bg-[#fbfaf6]/95 border-r border-princess-pink">
+        <div className="px-6 pt-7 pb-6">
+          <Brand />
         </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1.5">{navLinks}</nav>
-
-        {/* Footer Actions */}
-        <div className="p-4 border-t border-princess-pink-light space-y-2">
-          <Link
-            href="/convite/aurora-1-ano"
-            target="_blank"
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-princess-pink-light hover:bg-princess-lilac/30 text-princess-rose font-medium rounded-xl text-sm transition duration-200"
-          >
-            <ExternalLink size={16} />
-            Ver Convite Público
-          </Link>
-          <button
-            onClick={handleLogout}
-            disabled={loggingOut}
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 border border-red-100 hover:bg-red-50 text-red-500 font-medium rounded-xl text-sm transition duration-200 disabled:opacity-50"
-          >
-            <LogOut size={16} />
-            {loggingOut ? 'Saindo...' : 'Sair do Painel'}
-          </button>
-        </div>
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto" aria-label="Navegação do painel">{navLinks}</nav>
+        <div className="p-4 space-y-1.5 border-t border-princess-pink">{footerActions}</div>
       </aside>
 
-      {/* Header - Mobile */}
-      <header className="md:hidden flex items-center justify-between px-6 py-4 bg-white border-b border-princess-pink-light z-20 sticky top-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-princess-pink-light flex items-center justify-center text-princess-rose">
-            <TreePine size={18} />
-          </div>
-          <h1 className="font-serif-display font-bold text-md text-princess-text">Aurora 1 Ano</h1>
-        </div>
+      {/* Cabeçalho: celular e tablet */}
+      <header className="lg:hidden flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-[#fbfaf6]/95 backdrop-blur border-b border-princess-pink z-20 sticky top-0">
+        <Brand size="sm" />
         <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-1.5 rounded-lg border border-princess-pink-light text-princess-rose hover:bg-princess-pink-light transition"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Abrir menu"
+          aria-expanded={mobileMenuOpen}
+          className="grid place-items-center w-11 h-11 rounded-full border border-princess-pink text-princess-text hover:bg-princess-pink-light transition-colors"
         >
-          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          <Menu size={20} />
         </button>
       </header>
 
-      {/* Sidebar - Mobile Menu Overlay */}
+      {/* Menu: celular e tablet */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-30 flex">
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>
-          <aside className="relative flex flex-col w-72 max-w-[80vw] bg-white h-full z-40 animate-in slide-in-from-left duration-200">
-            <div className="p-6 border-b border-princess-pink-light flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-princess-pink-light flex items-center justify-center text-princess-rose">
-                  <TreePine size={22} />
-                </div>
-                <div>
-                  <h1 className="font-serif-display font-bold text-lg text-princess-text leading-tight">Aurora 1 Ano</h1>
-                  <p className="text-xs text-princess-text/50">Painel de Controle</p>
-                </div>
-              </div>
+        <div className="lg:hidden fixed inset-0 z-30 flex" role="dialog" aria-modal="true" aria-label="Menu do painel">
+          <div className="fixed inset-0 bg-princess-text/35 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
+          <aside className="relative flex flex-col w-80 max-w-[85vw] bg-[#fbfaf6] h-full z-40 shadow-2xl painel-drawer">
+            <div className="px-5 pt-5 pb-4 flex items-start justify-between gap-3">
+              <Brand />
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 rounded-lg border border-princess-pink-light text-princess-rose hover:bg-princess-pink-light transition"
+                aria-label="Fechar menu"
+                className="grid place-items-center w-11 h-11 shrink-0 rounded-full text-princess-text hover:bg-princess-pink-light transition-colors"
               >
-                <X size={18} />
+                <X size={20} />
               </button>
             </div>
-
-            <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">{navLinks}</nav>
-
-            <div className="p-6 border-t border-princess-pink-light space-y-2 shrink-0">
-              <Link
-                href="/convite/aurora-1-ano"
-                target="_blank"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-princess-pink-light text-princess-rose font-medium rounded-xl text-sm"
-              >
-                <ExternalLink size={16} />
-                Ver Convite
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="flex items-center justify-center gap-2 w-full py-2.5 px-4 border border-red-100 text-red-500 font-medium rounded-xl text-sm"
-              >
-                <LogOut size={16} />
-                Sair
-              </button>
-            </div>
+            <nav className="flex-1 px-4 space-y-1 overflow-y-auto" aria-label="Navegação do painel">{navLinks}</nav>
+            <div className="p-4 space-y-1.5 border-t border-princess-pink shrink-0">{footerActions}</div>
           </aside>
         </div>
       )}
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-x-hidden min-h-0">
-        <div className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto space-y-6">
+      {/* Conteúdo */}
+      <main className="flex-1 flex flex-col min-w-0">
+        <div key={pathname} className="flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-9 max-w-7xl w-full mx-auto space-y-6 painel-enter">
           {children}
         </div>
-        <footer className="py-6 px-8 border-t border-princess-pink-light/40 text-center text-xs text-princess-text/40 flex items-center justify-center gap-1 shrink-0 bg-white/40">
-          Feito com <Heart size={10} className="text-princess-rose fill-princess-rose" /> para o aniversário de 1 ano da Aurora
+        <footer className="py-6 px-6 text-center text-xs text-forest-sage-dark shrink-0">
+          Feito com carinho para o 1º aniversário da Aurora
         </footer>
       </main>
     </div>

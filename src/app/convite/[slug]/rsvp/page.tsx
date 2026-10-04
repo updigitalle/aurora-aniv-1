@@ -1,8 +1,10 @@
-import React from 'react';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 import { db } from '@/lib/db';
 import RsvpFormClient from './RsvpFormClient';
-import { Metadata } from 'next';
+import { conviteFonts } from '../../_shared/fonts';
+import { getInviteInfo } from '@/lib/invite';
 
 interface RsvpPageProps {
   params: Promise<{ slug: string }>;
@@ -12,8 +14,8 @@ export async function generateMetadata({ params }: RsvpPageProps): Promise<Metad
   const { slug } = await params;
   const event = await db.event.findUnique({ where: { slug } });
   return {
-    title: event ? `Confirmar Presença · 1 Aninho da ${event.babyName} 🦊🍄` : 'RSVP',
-    description: 'Confirme sua presença no aniversário!',
+    title: event ? `Confirmar presença · 1 Aninho da ${event.babyName}` : 'Confirmar presença',
+    description: 'Confirme sua presença no 1º aniversário da Aurora.',
   };
 }
 
@@ -22,18 +24,25 @@ export default async function RsvpPage({ params }: RsvpPageProps) {
   const event = await db.event.findUnique({ where: { slug } });
   if (!event) notFound();
 
+  const { deadlineLabel } = getInviteInfo(event);
+
   return (
-    <main className="min-h-screen gingham-bg flex flex-col items-center justify-start px-4 pt-8 pb-10 relative overflow-hidden">
-      {/* Floating sparkles */}
-      <span className="absolute top-10 left-6 text-xl text-princess-rose/25 animate-star-1 select-none pointer-events-none">✦</span>
-      <span className="absolute top-20 right-7 text-lg text-princess-gold/30 animate-star-2 select-none pointer-events-none">★</span>
-      <span className="absolute bottom-20 right-8 text-base text-princess-rose/20 animate-star-3 select-none pointer-events-none">✦</span>
+    <main className={`${conviteFonts} convite-page`}>
+      <div className="rsvp-sheet">
+        <div className="convite-crest rsvp-crest convite-in" style={{ '--d': '0ms' } as React.CSSProperties}>
+          <Image
+            src="/convite/brasao.webp"
+            alt={`Brasão do bosque encantado com a faixa "${event.babyName} 1 Aninho"`}
+            width={502}
+            height={502}
+            priority
+            unoptimized
+            className="convite-crest-img"
+          />
+        </div>
 
-      <RsvpFormClient slug={slug} babyName={event.babyName} />
-
-      <footer className="mt-7 text-center text-[10px] text-princess-rose/30 font-serif-display italic">
-        🌲 O bosque encantado celebra um ano de pura magia.
-      </footer>
+        <RsvpFormClient slug={slug} babyName={event.babyName} deadline={deadlineLabel} />
+      </div>
     </main>
   );
 }

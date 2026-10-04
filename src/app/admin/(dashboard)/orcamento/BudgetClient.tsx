@@ -5,7 +5,7 @@ import { Expense, Vendor, Payment } from '@prisma/client';
 import { createExpense, updateExpense, deleteExpense } from './actions';
 import {
   Wallet, Plus, Trash2, Edit2, X, Search, AlertCircle,
-  Sparkles, TrendingDown, TrendingUp, Tag, AlertTriangle,
+  Leaf, TrendingDown, TrendingUp, AlertTriangle,
   CheckCircle, Clock, CircleDashed, Building2, Info,
 } from 'lucide-react';
 
@@ -23,15 +23,16 @@ interface Props {
 
 const CATEGORIES = ['Espaço', 'Comida', 'Decoração', 'Serviços', 'Convites', 'Vestuário', 'Lembranças', 'Geral'];
 
+// Tons terrosos do bosque: musgo, raposa, cogumelo, corça, flor, casca, folha
 const CAT_COLORS: Record<string, string> = {
-  Espaço:     'bg-blue-50 text-blue-700 border-blue-200',
-  Comida:     'bg-orange-50 text-orange-700 border-orange-200',
-  Decoração:  'bg-pink-50 text-pink-700 border-pink-200',
-  Serviços:   'bg-purple-50 text-purple-700 border-purple-200',
-  Convites:   'bg-rose-50 text-rose-700 border-rose-200',
-  Vestuário:  'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200',
-  Lembranças: 'bg-teal-50 text-teal-700 border-teal-200',
-  Geral:      'bg-gray-50 text-gray-600 border-gray-200',
+  Espaço:     'bg-princess-pink-light text-forest-sage-dark border-princess-lilac',
+  Comida:     'bg-[#f6e9df] text-[#9a5a33] border-[#e8cdb9]',
+  Decoração:  'bg-[#f8e7e4] text-[#a8463a] border-[#eecbc5]',
+  Serviços:   'bg-princess-gold-light text-princess-gold-dark border-princess-gold/25',
+  Convites:   'bg-[#f6ecec] text-[#8f4f5e] border-[#e9d2d7]',
+  Vestuário:  'bg-[#f1ece2] text-[#7a6440] border-[#e2d8c3]',
+  Lembranças: 'bg-[#e8efe6] text-[#4f6b52] border-[#cfdccc]',
+  Geral:      'bg-princess-lavender text-princess-text/70 border-princess-pink',
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -173,18 +174,18 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
           <p className="text-sm text-princess-text/60">Controle os gastos previstos e reais de cada serviço</p>
         </div>
         <button onClick={openAdd}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-princess-rose to-princess-pink-dark hover:opacity-90 text-white rounded-xl font-medium shadow-md transition text-sm">
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-princess-rose hover:bg-princess-pink-dark text-white rounded-xl font-medium shadow-md transition text-sm">
           <Plus size={16} /> Adicionar Despesa
         </button>
       </div>
 
       {/* ── Alerta orçamento estourado ── */}
       {isOverBudget && (
-        <div className="bg-red-50 border border-red-200 p-4 rounded-2xl flex items-start gap-3">
-          <AlertTriangle size={20} className="text-red-500 shrink-0 mt-0.5" />
+        <div className="bg-[#f9ebe8] border border-[#ebc6be] p-4 rounded-2xl flex items-start gap-3">
+          <AlertTriangle size={20} className="text-forest-berry shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold text-sm text-red-700">Atenção: orçamento excedido!</p>
-            <p className="text-xs text-red-600 mt-0.5">
+            <p className="font-bold text-sm text-[#8a2f22]">Atenção: orçamento excedido!</p>
+            <p className="text-xs text-forest-berry mt-0.5">
               O gasto real ({fmt(totalActual)}) ultrapassou o previsto ({fmt(totalPlanned)}) em <strong>{fmt(totalActual - totalPlanned)}</strong>.
             </p>
           </div>
@@ -203,7 +204,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
         {/* Gasto Real */}
         <div className="bg-white p-5 rounded-2xl border border-princess-pink-light/40 princess-card-shadow space-y-2">
           <span className="text-[11px] font-bold text-princess-rose/70 uppercase tracking-wider">Gasto Real</span>
-          <p className={`text-2xl font-serif-display font-bold ${isOverBudget ? 'text-red-500' : 'text-princess-rose'}`}>
+          <p className={`text-2xl font-serif-display font-bold ${isOverBudget ? 'text-forest-berry' : 'text-princess-rose'}`}>
             {fmt(totalActual)}
           </p>
           <p className="text-[11px] text-princess-text/45">
@@ -212,19 +213,19 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
         </div>
 
         {/* Total Pago */}
-        <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 princess-card-shadow space-y-2">
-          <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Total Pago</span>
-          <p className="text-2xl font-serif-display font-bold text-emerald-600">{fmt(totalPaid)}</p>
-          <p className="text-[11px] text-emerald-500">
+        <div className="bg-princess-pink-light p-5 rounded-2xl border border-princess-lilac princess-card-shadow space-y-2">
+          <span className="text-[11px] font-bold text-forest-sage-dark uppercase tracking-wider">Total Pago</span>
+          <p className="text-2xl font-serif-display font-bold text-forest-sage-dark">{fmt(totalPaid)}</p>
+          <p className="text-[11px] text-princess-rose">
             {totalActual > 0 ? `${pctPaid.toFixed(0)}% quitado` : 'Pagamentos confirmados'}
           </p>
         </div>
 
         {/* Restante */}
-        <div className="bg-amber-50 p-5 rounded-2xl border border-amber-100 princess-card-shadow space-y-2">
-          <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Restante</span>
-          <p className="text-2xl font-serif-display font-bold text-amber-600">{fmt(totalRemaining)}</p>
-          <p className="text-[11px] text-amber-500">A pagar aos fornecedores</p>
+        <div className="bg-princess-gold-light p-5 rounded-2xl border border-princess-gold/25 princess-card-shadow space-y-2">
+          <span className="text-[11px] font-bold text-princess-gold-dark uppercase tracking-wider">Restante</span>
+          <p className="text-2xl font-serif-display font-bold text-princess-gold">{fmt(totalRemaining)}</p>
+          <p className="text-[11px] text-princess-gold">A pagar aos fornecedores</p>
         </div>
       </div>
 
@@ -242,19 +243,19 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
           {/* camada de fundo: % gasto real / previsto */}
           {totalPlanned > 0 && (
             <div
-              className={`absolute inset-y-0 left-0 rounded-full transition-all duration-700 opacity-30 ${isOverBudget ? 'bg-red-400' : 'bg-princess-rose'}`}
+              className={`absolute inset-y-0 left-0 rounded-full transition-all duration-700 opacity-30 ${isOverBudget ? 'bg-forest-berry' : 'bg-princess-rose'}`}
               style={{ width: `${pctActual}%` }}
             />
           )}
           {/* camada principal: % pago / real */}
           <div
-            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-700"
+            className="absolute inset-y-0 left-0 rounded-full bg-princess-rose transition-all duration-700"
             style={{ width: `${pctPaid}%` }}
           />
         </div>
 
         <div className="flex items-center gap-4 text-[11px] text-princess-text/50">
-          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" /> Pago</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-princess-rose inline-block" /> Pago</span>
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-princess-rose/30 inline-block" /> Gasto real</span>
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-princess-pink-light/60 inline-block border border-princess-pink/20" /> Previsto</span>
         </div>
@@ -267,7 +268,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-princess-rose/50" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar despesa ou fornecedor..."
-            className="w-full pl-9 pr-4 py-2 bg-[#FAF9F6] border border-princess-rose/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+            className="w-full pl-9 pr-4 py-2 bg-princess-lavender border border-princess-rose/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
         </div>
 
         {/* Pills de categoria */}
@@ -277,7 +278,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
               className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${
                 catFilter === cat
                   ? 'bg-princess-rose text-white border-princess-rose shadow-sm'
-                  : 'bg-[#FAF9F6] text-princess-text/60 border-princess-rose/15 hover:border-princess-rose/40'
+                  : 'bg-princess-lavender text-princess-text/60 border-princess-rose/15 hover:border-princess-rose/40'
               }`}>
               {cat}
             </button>
@@ -307,7 +308,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                 const diff = e.actualValue - e.plannedValue;
 
                 return (
-                  <tr key={e.id} className="hover:bg-[#FAF9F6]/60 transition group">
+                  <tr key={e.id} className="hover:bg-princess-lavender/60 transition group">
                     {/* Descrição */}
                     <td className="px-4 py-3.5 font-semibold text-princess-text max-w-[180px]">
                       <span className="truncate block">{e.description}</span>
@@ -331,12 +332,12 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                         <div>
                           <span className="font-bold text-princess-text">{fmt(e.actualValue)}</span>
                           {diff > 0 && e.plannedValue > 0 && (
-                            <span className="text-[10px] text-red-500 flex items-center justify-end gap-0.5 mt-0.5">
+                            <span className="text-[10px] text-forest-berry flex items-center justify-end gap-0.5 mt-0.5">
                               <TrendingUp size={9} /> +{fmt(diff)}
                             </span>
                           )}
                           {diff < 0 && (
-                            <span className="text-[10px] text-emerald-600 flex items-center justify-end gap-0.5 mt-0.5">
+                            <span className="text-[10px] text-forest-sage-dark flex items-center justify-end gap-0.5 mt-0.5">
                               <TrendingDown size={9} /> {fmt(diff)}
                             </span>
                           )}
@@ -354,7 +355,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                             <Building2 size={11} /> {e.vendor.name}
                           </span>
                           {vendorPaid > 0 && (
-                            <span className="text-[10px] text-emerald-600 mt-0.5 block">
+                            <span className="text-[10px] text-forest-sage-dark mt-0.5 block">
                               {fmt(vendorPaid)} pagos
                             </span>
                           )}
@@ -367,22 +368,22 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                     {/* Status */}
                     <td className="px-4 py-3.5">
                       {status === 'pago' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-forest-sage-dark bg-princess-pink-light border border-princess-lilac px-2 py-0.5 rounded-lg">
                           <CheckCircle size={11} /> Pago
                         </span>
                       )}
                       {status === 'parcial' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-forest-sage-dark bg-princess-pink-light border border-princess-lilac px-2 py-0.5 rounded-lg">
                           <Clock size={11} /> Parcial
                         </span>
                       )}
                       {status === 'pendente' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-princess-gold-dark bg-princess-gold-light border border-princess-gold/25 px-2 py-0.5 rounded-lg">
                           <Clock size={11} /> Pendente
                         </span>
                       )}
                       {status === 'sem_fornecedor' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-gray-500 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-lg">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-princess-text/60 bg-princess-lavender border border-princess-pink px-2 py-0.5 rounded-lg">
                           <CircleDashed size={11} /> Sem fornecedor
                         </span>
                       )}
@@ -396,7 +397,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                           <Edit2 size={14} />
                         </button>
                         <button onClick={() => handleDelete(e.id)}
-                          className="p-1.5 text-princess-text/60 hover:text-red-500 hover:bg-red-50 rounded-lg transition" title="Excluir">
+                          className="p-1.5 text-princess-text/60 hover:text-forest-berry hover:bg-[#f9ebe8] rounded-lg transition" title="Excluir">
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -453,7 +454,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
             </button>
 
             <h3 className="font-serif-display font-bold text-lg text-princess-text mb-5 flex items-center gap-1.5">
-              <Sparkles size={16} className="text-princess-gold" />
+              <Leaf size={16} className="text-princess-gold" />
               {editing ? 'Editar Despesa' : 'Nova Despesa'}
             </h3>
 
@@ -464,7 +465,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                 <label className="block text-xs font-semibold text-princess-text/75 mb-1">Descrição *</label>
                 <input value={fDesc} onChange={e => setFDesc(e.target.value)} required
                   placeholder="Ex: Bolo decorado Princesa Aurora"
-                  className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                  className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
               </div>
 
               {/* Categoria */}
@@ -476,7 +477,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                       className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${
                         fCat === cat
                           ? 'bg-princess-rose text-white border-princess-rose'
-                          : 'bg-[#FAF9F6] text-princess-text/60 border-princess-rose/15 hover:border-princess-rose/40'
+                          : 'bg-princess-lavender text-princess-text/60 border-princess-rose/15 hover:border-princess-rose/40'
                       }`}>
                       {cat}
                     </button>
@@ -490,7 +491,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                   Fornecedor <span className="text-princess-text/40 font-normal">opcional</span>
                 </label>
                 <select value={fVendorId} onChange={e => handleVendorChange(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30">
+                  className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30">
                   <option value="">Nenhum fornecedor</option>
                   {vendors.map(v => (
                     <option key={v.id} value={v.id}>{v.name} — {v.service}</option>
@@ -506,7 +507,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                 <input type="number" step="0.01" min="0" value={fPlanned}
                   onChange={e => setFPlanned(e.target.value)} required
                   placeholder="0,00"
-                  className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                  className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
               </div>
 
               {/* Valor Real (derivado do fornecedor) */}
@@ -519,36 +520,36 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                 </label>
                 <div className={`w-full px-3 py-2.5 rounded-xl text-sm border flex items-center justify-between ${
                   fVendorId
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700 font-semibold'
-                    : 'bg-gray-50 border-gray-200 text-gray-400'
+                    ? 'bg-princess-pink-light border-princess-lilac text-forest-sage-dark font-semibold'
+                    : 'bg-princess-lavender border-princess-pink text-princess-text/50'
                 }`}>
                   <span>{fVendorId ? fmt(modalActualValue) : 'Selecione um fornecedor'}</span>
-                  {fVendorId && <CheckCircle size={14} className="text-emerald-500" />}
+                  {fVendorId && <CheckCircle size={14} className="text-princess-rose" />}
                 </div>
               </div>
 
               {/* Aviso se não tiver fornecedor */}
               {!fVendorId && (
-                <p className="text-[11px] text-amber-600 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 flex items-start gap-1.5">
+                <p className="text-[11px] text-princess-gold bg-princess-gold-light border border-princess-gold/25 rounded-lg px-3 py-2 flex items-start gap-1.5">
                   <AlertCircle size={12} className="mt-0.5 shrink-0" />
                   O valor real é preenchido automaticamente ao vincular um fornecedor. Você pode adicionar a despesa sem fornecedor e editar depois.
                 </p>
               )}
 
               {fError && (
-                <p className="text-xs text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 flex items-center gap-1.5">
+                <p className="text-xs text-forest-berry bg-[#f9ebe8] p-3 rounded-xl border border-[#f1d5cf] flex items-center gap-1.5">
                   <AlertCircle size={13} /> {fError}
                 </p>
               )}
 
               <div className="flex justify-end gap-3 pt-1">
                 <button type="button" onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 text-sm text-princess-text/60 hover:bg-gray-50 rounded-xl transition">
+                  className="px-4 py-2 text-sm text-princess-text/60 hover:bg-princess-lavender rounded-xl transition">
                   Cancelar
                 </button>
                 <button type="submit" disabled={isPending}
-                  className="px-5 py-2 text-sm bg-gradient-to-r from-princess-rose to-princess-pink-dark hover:opacity-90 text-white rounded-xl font-medium shadow-sm transition disabled:opacity-50 flex items-center gap-1.5">
-                  {isPending ? 'Salvando...' : 'Salvar Despesa'} <Sparkles size={13} />
+                  className="px-5 py-2 text-sm bg-princess-rose hover:bg-princess-pink-dark text-white rounded-xl font-medium shadow-sm transition disabled:opacity-50 flex items-center gap-1.5">
+                  {isPending ? 'Salvando...' : 'Salvar Despesa'} <Leaf size={13} />
                 </button>
               </div>
             </form>
