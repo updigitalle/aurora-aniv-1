@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
-type Member = { name: string; type: 'adulto' | 'crianca' | 'bebe'; confirmed: boolean };
-
-const parseMembers = (raw: string | null): Member[] => {
-  try { return raw ? JSON.parse(raw) : []; } catch { return []; }
-};
+import { type FamilyMember as Member, parseMembers, isValidChildAge, countsFromMembers } from '@/lib/guests';
 
 // ─── Busca de convidados pré-cadastrados (somente quem está na lista) ──────────
 // GET /api/rsvp?slug=<slug>&q=<termo>
@@ -82,21 +78,33 @@ export async function POST(request: Request) {
     const original = parseMembers(guest.familyMembers as string | null);
 
     // Marca confirmados conforme a escolha; nenhum membro novo pode ser criado aqui.
-    const confirmSet = new Set(
-      (members ?? []).filter(m => m.confirmed).map(m => `${m.type}::${m.name}`)
-    );
-    const updatedMembers: Member[] = original.map(m => ({
-      ...m,
-      confirmed: status === 'confirmado' ? confirmSet.has(`${m.type}::${m.name}`) : false,
-    }));
+    const sent = new Map((members ?? []).map(m => [`${m.type}::${m.name}`, m]));
+    const updatedMembers: Member[] = original.map(m => {
+      const choice = sent.get(`${m.type}::${m.name}`);
+      const confirmed = status === 'confirmado' && !!choice?.confirmed;
+      // Idade só vale para criança confirmada; mantém a já cadastrada se o convidado não reenviar
+      const age = m.type === 'crianca' && confirmed
+        ? (isValidChildAge(choice?.age) ? choice!.age : m.age ?? null)
+        : m.age ?? null;
+      return { ...m, confirmed, ...(m.type === 'crianca' && { age }) };
+    });
+
+    // Toda criança confirmada precisa de idade: até 5 anos não entra no buffet
+    if (status === 'confirmado') {
+      const semIdade = updatedMembers.find(m => m.type === 'crianca' && m.confirmed && !isValidChildAge(m.age));
+      if (semIdade) {
+        return NextResponse.json(
+          { error: `Informe a idade de ${semIdade.name}.` },
+          { status: 400 }
+        );
+      }
+      if (original.length > 0 && !updatedMembers.some(m => m.confirmed)) {
+        return NextResponse.json({ error: 'Marque quem vai comparecer.' }, { status: 400 });
+      }
+    }
 
     // Contagem: bebês NÃO ocupam vaga.
-    const counts = status === 'confirmado'
-      ? {
-          adultsCount:   updatedMembers.filter(m => m.confirmed && m.type === 'adulto').length,
-          childrenCount: updatedMembers.filter(m => m.confirmed && m.type === 'crianca').length,
-        }
-      : { adultsCount: 0, childrenCount: 0 };
+    const counts = countsFromMembers(updatedMembers, status);
 
     // Se não há membros cadastrados (família "avulsa"), confirma a família inteira.
     const adultsCount = original.length === 0 && status === 'confirmado'

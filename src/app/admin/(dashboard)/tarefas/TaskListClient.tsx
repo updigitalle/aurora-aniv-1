@@ -123,11 +123,11 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'alta':
-        return <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-[#f9ebe8] text-forest-berry border border-[#f1d5cf] uppercase">Alta</span>;
+        return <span className="px-2 py-0.5 text-xs font-bold rounded bg-[#f9ebe8] text-forest-berry border border-[#f1d5cf] uppercase">Alta</span>;
       case 'media':
-        return <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-princess-gold-light text-princess-gold-dark border border-princess-gold-light uppercase">Média</span>;
+        return <span className="px-2 py-0.5 text-xs font-bold rounded bg-princess-gold-light text-princess-gold-dark border border-princess-gold-light uppercase">Média</span>;
       default:
-        return <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-princess-lavender text-princess-text/60 border border-princess-pink uppercase">Baixa</span>;
+        return <span className="px-2 py-0.5 text-xs font-bold rounded bg-princess-lavender text-princess-text/60 border border-princess-pink uppercase">Baixa</span>;
     }
   };
 
@@ -247,19 +247,19 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Pesquisar tarefas..."
-            className="w-full pl-9 pr-4 py-2 bg-princess-lavender border border-princess-rose/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/30 text-sm"
+            className="w-full pl-9 pr-4 py-3 md:py-2 bg-princess-lavender border border-princess-rose/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/30 text-sm"
           />
         </div>
 
         {/* Botões de Filtros */}
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3 w-full md:w-auto">
           {/* Categoria */}
-          <div className="flex items-center gap-1.5 bg-princess-lavender border border-princess-rose/10 rounded-xl px-3 py-1.5 text-sm">
+          <div className="flex items-center gap-1.5 bg-princess-lavender border border-princess-rose/10 rounded-xl px-3 min-h-11 md:min-h-0 md:py-1.5 text-sm">
             <Tag size={14} className="text-princess-rose" />
             <select
               value={selectedCategory}
               onChange={e => setSelectedCategory(e.target.value)}
-              className="bg-transparent focus:outline-none font-medium text-princess-text/80 cursor-pointer"
+              className="w-full min-w-0 min-h-11 md:min-h-0 bg-transparent focus:outline-none font-medium text-princess-text/80 cursor-pointer"
             >
               <option value="Todos">Todas Categorias</option>
               {CATEGORIES.map(cat => (
@@ -269,10 +269,10 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
           </div>
 
           {/* Status */}
-          <div className="flex items-center bg-princess-lavender border border-princess-rose/10 rounded-xl p-1 text-sm">
+          <div className="grid grid-cols-3 sm:flex items-center bg-princess-lavender border border-princess-rose/10 rounded-xl p-1 text-sm" role="group" aria-label="Filtrar por status">
             <button
               onClick={() => setStatusFilter('todos')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+              className={`px-3 min-h-10 sm:min-h-0 sm:py-1 rounded-lg text-sm sm:text-xs font-semibold transition ${
                 statusFilter === 'todos' ? 'bg-white text-princess-rose shadow-sm' : 'text-princess-text/60 hover:text-princess-text'
               }`}
             >
@@ -280,7 +280,7 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
             </button>
             <button
               onClick={() => setStatusFilter('pendentes')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+              className={`px-3 min-h-10 sm:min-h-0 sm:py-1 rounded-lg text-sm sm:text-xs font-semibold transition ${
                 statusFilter === 'pendentes' ? 'bg-white text-princess-rose shadow-sm' : 'text-princess-text/60 hover:text-princess-text'
               }`}
             >
@@ -288,7 +288,7 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
             </button>
             <button
               onClick={() => setStatusFilter('concluidas')}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
+              className={`px-3 min-h-10 sm:min-h-0 sm:py-1 rounded-lg text-sm sm:text-xs font-semibold transition ${
                 statusFilter === 'concluidas' ? 'bg-white text-princess-rose shadow-sm' : 'text-princess-text/60 hover:text-princess-text'
               }`}
             >
@@ -309,10 +309,11 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
                   task.completed ? 'bg-princess-pink-light/10 opacity-70' : 'hover:bg-princess-lavender'
                 }`}
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 min-w-0">
                   <button
                     onClick={() => handleToggle(task.id, task.completed)}
-                    className="mt-0.5 text-princess-rose hover:scale-105 active:scale-95 transition shrink-0"
+                    className="-m-2.5 p-2.5 text-princess-rose hover:scale-105 active:scale-95 transition shrink-0"
+                    aria-label={task.completed ? `Reabrir ${task.title}` : `Concluir ${task.title}`}
                   >
                     {task.completed ? (
                       <CheckSquare size={20} className="fill-princess-pink-light" />
@@ -344,8 +345,9 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
 
                 <button
                   onClick={() => handleDelete(task.id)}
-                  className="p-2 text-princess-text/40 hover:text-forest-berry hover:bg-[#f9ebe8] rounded-xl transition duration-150 shrink-0 md:opacity-0 group-hover:opacity-100"
+                  className="w-11 h-11 md:w-auto md:h-auto md:p-2 grid place-items-center -mr-2 md:mr-0 text-princess-text/40 hover:text-forest-berry hover:bg-[#f9ebe8] rounded-xl transition duration-150 shrink-0 md:opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
                   title="Excluir tarefa"
+                  aria-label={`Excluir ${task.title}`}
                 >
                   <Trash2 size={16} />
                 </button>

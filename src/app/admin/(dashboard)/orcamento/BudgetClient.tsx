@@ -196,36 +196,36 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Orçamento Previsto */}
         <div className="bg-white p-5 rounded-2xl border border-princess-pink-light/40 princess-card-shadow space-y-2">
-          <span className="text-[11px] font-bold text-princess-text/45 uppercase tracking-wider">Previsto</span>
+          <span className="text-xs font-bold text-princess-text/45 uppercase tracking-wider">Previsto</span>
           <p className="text-2xl font-serif-display font-bold text-princess-text">{fmt(totalPlanned)}</p>
-          <p className="text-[11px] text-princess-text/45">Total estimado</p>
+          <p className="text-xs text-princess-text/45">Total estimado</p>
         </div>
 
         {/* Gasto Real */}
         <div className="bg-white p-5 rounded-2xl border border-princess-pink-light/40 princess-card-shadow space-y-2">
-          <span className="text-[11px] font-bold text-princess-rose/70 uppercase tracking-wider">Gasto Real</span>
+          <span className="text-xs font-bold text-princess-rose/70 uppercase tracking-wider">Gasto Real</span>
           <p className={`text-2xl font-serif-display font-bold ${isOverBudget ? 'text-forest-berry' : 'text-princess-rose'}`}>
             {fmt(totalActual)}
           </p>
-          <p className="text-[11px] text-princess-text/45">
+          <p className="text-xs text-princess-text/45">
             {totalPlanned > 0 ? `${pctActual.toFixed(0)}% do previsto` : 'Com fornecedores'}
           </p>
         </div>
 
         {/* Total Pago */}
         <div className="bg-princess-pink-light p-5 rounded-2xl border border-princess-lilac princess-card-shadow space-y-2">
-          <span className="text-[11px] font-bold text-forest-sage-dark uppercase tracking-wider">Total Pago</span>
+          <span className="text-xs font-bold text-forest-sage-dark uppercase tracking-wider">Total Pago</span>
           <p className="text-2xl font-serif-display font-bold text-forest-sage-dark">{fmt(totalPaid)}</p>
-          <p className="text-[11px] text-princess-rose">
+          <p className="text-xs text-princess-rose">
             {totalActual > 0 ? `${pctPaid.toFixed(0)}% quitado` : 'Pagamentos confirmados'}
           </p>
         </div>
 
         {/* Restante */}
         <div className="bg-princess-gold-light p-5 rounded-2xl border border-princess-gold/25 princess-card-shadow space-y-2">
-          <span className="text-[11px] font-bold text-princess-gold-dark uppercase tracking-wider">Restante</span>
+          <span className="text-xs font-bold text-princess-gold-dark uppercase tracking-wider">Restante</span>
           <p className="text-2xl font-serif-display font-bold text-princess-gold">{fmt(totalRemaining)}</p>
-          <p className="text-[11px] text-princess-gold">A pagar aos fornecedores</p>
+          <p className="text-xs text-princess-gold">A pagar aos fornecedores</p>
         </div>
       </div>
 
@@ -254,7 +254,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
           />
         </div>
 
-        <div className="flex items-center gap-4 text-[11px] text-princess-text/50">
+        <div className="flex items-center gap-4 text-xs text-princess-text/50">
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-princess-rose inline-block" /> Pago</span>
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-princess-rose/30 inline-block" /> Gasto real</span>
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-princess-pink-light/60 inline-block border border-princess-pink/20" /> Previsto</span>
@@ -268,14 +268,14 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-princess-rose/50" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar despesa ou fornecedor..."
-            className="w-full pl-9 pr-4 py-2 bg-princess-lavender border border-princess-rose/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+            className="w-full pl-9 pr-4 py-3 md:py-2 bg-princess-lavender border border-princess-rose/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
         </div>
 
         {/* Pills de categoria */}
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex gap-1.5 w-full md:w-auto overflow-x-auto md:flex-wrap -mx-4 px-4 md:mx-0 md:px-0 pb-1 md:pb-0 [scrollbar-width:none]">
           {['Todos', ...CATEGORIES].map(cat => (
-            <button key={cat} onClick={() => setCatFilter(cat)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${
+            <button key={cat} onClick={() => setCatFilter(cat)} aria-pressed={catFilter === cat}
+              className={`shrink-0 px-3.5 min-h-10 md:min-h-0 md:py-1 rounded-full text-sm md:text-xs font-semibold border transition ${
                 catFilter === cat
                   ? 'bg-princess-rose text-white border-princess-rose shadow-sm'
                   : 'bg-princess-lavender text-princess-text/60 border-princess-rose/15 hover:border-princess-rose/40'
@@ -286,12 +286,106 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
         </div>
       </div>
 
-      {/* ── Tabela ── */}
-      <div className="bg-white rounded-2xl border border-princess-pink-light/40 overflow-hidden shadow-sm">
+      {/* ── Lista em cartões (celular) ── */}
+      <ul className="md:hidden space-y-3" aria-label="Despesas">
+        {filtered.length > 0 ? filtered.map(e => {
+          const status = getPaymentStatus(e);
+          const vendorPaid = e.vendor?.payments.reduce((s, p) => s + p.amount, 0) ?? 0;
+          const diff = e.actualValue - e.plannedValue;
+          const badge = {
+            pago:           { label: 'Pago', Icon: CheckCircle, cls: 'text-forest-sage-dark bg-princess-pink-light border-princess-lilac' },
+            parcial:        { label: 'Parcial', Icon: Clock, cls: 'text-forest-sage-dark bg-princess-pink-light border-princess-lilac' },
+            pendente:       { label: 'Pendente', Icon: Clock, cls: 'text-princess-gold-dark bg-princess-gold-light border-princess-gold/25' },
+            sem_fornecedor: { label: 'Sem fornecedor', Icon: CircleDashed, cls: 'text-princess-text/60 bg-princess-lavender border-princess-pink' },
+          }[status];
+
+          return (
+            <li key={e.id} className="bg-white rounded-2xl border border-princess-pink-light/40 shadow-sm p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold text-princess-text leading-snug break-words">{e.description}</p>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                    <span className={`px-2 py-0.5 rounded-lg border text-xs font-semibold ${CAT_COLORS[e.category] ?? CAT_COLORS.Geral}`}>
+                      {e.category}
+                    </span>
+                    {badge && (
+                      <span className={`inline-flex items-center gap-1 text-xs font-bold border px-2 py-0.5 rounded-lg ${badge.cls}`}>
+                        <badge.Icon size={12} /> {badge.label}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center -mr-2 -mt-1 shrink-0">
+                  <button onClick={() => openEdit(e)} aria-label={`Editar ${e.description}`}
+                    className="w-11 h-11 grid place-items-center text-princess-text/60 hover:text-princess-rose hover:bg-princess-pink-light/30 rounded-xl transition">
+                    <Edit2 size={17} />
+                  </button>
+                  <button onClick={() => handleDelete(e.id)} aria-label={`Excluir ${e.description}`}
+                    className="w-11 h-11 grid place-items-center text-princess-text/60 hover:text-forest-berry hover:bg-[#f9ebe8] rounded-xl transition">
+                    <Trash2 size={17} />
+                  </button>
+                </div>
+              </div>
+
+              <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <dt className="text-xs text-princess-text/55">Previsto</dt>
+                  <dd className="tabular-nums text-princess-text/75">{fmt(e.plannedValue)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-princess-text/55">Real</dt>
+                  <dd className="tabular-nums font-bold text-princess-text">
+                    {e.actualValue > 0 ? fmt(e.actualValue) : <span className="font-normal text-princess-text/35">—</span>}
+                    {e.actualValue > 0 && diff > 0 && e.plannedValue > 0 && (
+                      <span className="block text-xs font-normal text-forest-berry">+{fmt(diff)}</span>
+                    )}
+                    {e.actualValue > 0 && diff < 0 && (
+                      <span className="block text-xs font-normal text-forest-sage-dark">{fmt(diff)}</span>
+                    )}
+                  </dd>
+                </div>
+              </dl>
+
+              <p className="mt-3 pt-3 border-t border-princess-pink-light/30 text-sm flex flex-wrap items-center gap-x-2">
+                {e.vendor ? (
+                  <>
+                    <span className="inline-flex items-center gap-1 font-semibold text-princess-rose"><Building2 size={14} /> {e.vendor.name}</span>
+                    {vendorPaid > 0 && <span className="text-forest-sage-dark">{fmt(vendorPaid)} pagos</span>}
+                  </>
+                ) : (
+                  <span className="text-princess-text/45">Sem fornecedor vinculado</span>
+                )}
+              </p>
+            </li>
+          );
+        }) : (
+          <li className="bg-white rounded-2xl border border-princess-pink-light/40 py-12 px-4 text-center">
+            <Wallet size={32} className="mx-auto text-princess-rose/25 mb-3" />
+            <p className="text-sm text-princess-text/55 font-medium">Nenhuma despesa encontrada.</p>
+            {catFilter !== 'Todos' && (
+              <button onClick={() => setCatFilter('Todos')} className="mt-2 min-h-11 px-3 text-sm text-princess-rose hover:underline">
+                Limpar filtro
+              </button>
+            )}
+          </li>
+        )}
+        {filtered.length > 0 && (
+          <li className="px-1 text-sm font-semibold text-princess-text/60 flex flex-wrap justify-between gap-2">
+            <span>{filtered.length} {filtered.length === 1 ? 'despesa' : 'despesas'}</span>
+            <span className="tabular-nums">
+              Previsto {fmt(filtered.reduce((s, e) => s + e.plannedValue, 0))}
+              {' · '}<span className="text-princess-rose">Real {fmt(filtered.reduce((s, e) => s + e.actualValue, 0))}</span>
+            </span>
+          </li>
+        )}
+      </ul>
+
+      {/* ── Tabela (tablet e desktop) ── */}
+      <div className="hidden md:block bg-white rounded-2xl border border-princess-pink-light/40 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-princess-pink-light/20 text-[11px] font-bold text-princess-text/60 uppercase tracking-wider border-b border-princess-pink-light/30">
+              <tr className="bg-princess-pink-light/20 text-xs font-bold text-princess-text/60 uppercase tracking-wider border-b border-princess-pink-light/30">
                 <th className="px-4 py-3">Descrição</th>
                 <th className="px-4 py-3">Categoria</th>
                 <th className="px-4 py-3 text-right">Previsto</th>
@@ -316,7 +410,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
 
                     {/* Categoria */}
                     <td className="px-4 py-3.5">
-                      <span className={`px-2 py-0.5 rounded-lg border text-[11px] font-semibold ${CAT_COLORS[e.category] ?? CAT_COLORS.Geral}`}>
+                      <span className={`px-2 py-0.5 rounded-lg border text-xs font-semibold ${CAT_COLORS[e.category] ?? CAT_COLORS.Geral}`}>
                         {e.category}
                       </span>
                     </td>
@@ -332,12 +426,12 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                         <div>
                           <span className="font-bold text-princess-text">{fmt(e.actualValue)}</span>
                           {diff > 0 && e.plannedValue > 0 && (
-                            <span className="text-[10px] text-forest-berry flex items-center justify-end gap-0.5 mt-0.5">
+                            <span className="text-xs text-forest-berry flex items-center justify-end gap-0.5 mt-0.5">
                               <TrendingUp size={9} /> +{fmt(diff)}
                             </span>
                           )}
                           {diff < 0 && (
-                            <span className="text-[10px] text-forest-sage-dark flex items-center justify-end gap-0.5 mt-0.5">
+                            <span className="text-xs text-forest-sage-dark flex items-center justify-end gap-0.5 mt-0.5">
                               <TrendingDown size={9} /> {fmt(diff)}
                             </span>
                           )}
@@ -355,7 +449,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                             <Building2 size={11} /> {e.vendor.name}
                           </span>
                           {vendorPaid > 0 && (
-                            <span className="text-[10px] text-forest-sage-dark mt-0.5 block">
+                            <span className="text-xs text-forest-sage-dark mt-0.5 block">
                               {fmt(vendorPaid)} pagos
                             </span>
                           )}
@@ -368,22 +462,22 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
                     {/* Status */}
                     <td className="px-4 py-3.5">
                       {status === 'pago' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-forest-sage-dark bg-princess-pink-light border border-princess-lilac px-2 py-0.5 rounded-lg">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-forest-sage-dark bg-princess-pink-light border border-princess-lilac px-2 py-0.5 rounded-lg">
                           <CheckCircle size={11} /> Pago
                         </span>
                       )}
                       {status === 'parcial' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-forest-sage-dark bg-princess-pink-light border border-princess-lilac px-2 py-0.5 rounded-lg">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-forest-sage-dark bg-princess-pink-light border border-princess-lilac px-2 py-0.5 rounded-lg">
                           <Clock size={11} /> Parcial
                         </span>
                       )}
                       {status === 'pendente' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-princess-gold-dark bg-princess-gold-light border border-princess-gold/25 px-2 py-0.5 rounded-lg">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-princess-gold-dark bg-princess-gold-light border border-princess-gold/25 px-2 py-0.5 rounded-lg">
                           <Clock size={11} /> Pendente
                         </span>
                       )}
                       {status === 'sem_fornecedor' && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-princess-text/60 bg-princess-lavender border border-princess-pink px-2 py-0.5 rounded-lg">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-princess-text/60 bg-princess-lavender border border-princess-pink px-2 py-0.5 rounded-lg">
                           <CircleDashed size={11} /> Sem fornecedor
                         </span>
                       )}
@@ -449,7 +543,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
 
           <div className="bg-white rounded-2xl w-full max-w-md p-6 princess-card-shadow border border-princess-pink-light/40 relative z-10">
             <button onClick={() => setModalOpen(false)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg border border-princess-pink-light text-princess-rose hover:bg-princess-pink-light/30 transition">
+              className="absolute top-3 right-3 w-11 h-11 grid place-items-center rounded-xl border border-princess-pink-light text-princess-rose hover:bg-princess-pink-light/30 transition">
               <X size={16} />
             </button>
 
@@ -530,7 +624,7 @@ export default function BudgetClient({ initialExpenses, vendors }: Props) {
 
               {/* Aviso se não tiver fornecedor */}
               {!fVendorId && (
-                <p className="text-[11px] text-princess-gold bg-princess-gold-light border border-princess-gold/25 rounded-lg px-3 py-2 flex items-start gap-1.5">
+                <p className="text-xs text-princess-gold bg-princess-gold-light border border-princess-gold/25 rounded-lg px-3 py-2 flex items-start gap-1.5">
                   <AlertCircle size={12} className="mt-0.5 shrink-0" />
                   O valor real é preenchido automaticamente ao vincular um fornecedor. Você pode adicionar a despesa sem fornecedor e editar depois.
                 </p>

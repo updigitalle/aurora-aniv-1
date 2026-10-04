@@ -2,17 +2,28 @@
 
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-
-export type FamilyMember = {
-  name: string;
-  type: 'adulto' | 'crianca' | 'bebe';
-  confirmed: boolean;
-};
+import { type FamilyMember, familyNameFromMembers, isValidChildAge } from '@/lib/guests';
 
 const revalidateAll = () => {
   revalidatePath('/admin/convidados');
   revalidatePath('/admin/dashboard');
 };
+
+/** Limpa a lista vinda do formulário e valida: ao menos um membro, idade de criança entre 0 e 17. */
+function normalizeMembers(raw: FamilyMember[] | undefined): { members: FamilyMember[]; error?: string } {
+  const members = (raw ?? [])
+    .map(m => ({
+      name: m.name.trim(),
+      type: m.type,
+      confirmed: !!m.confirmed,
+      ...(m.type === 'crianca' && { age: m.age ?? null }),
+    }))
+    .filter(m => m.name);
+  if (members.length === 0) return { members, error: 'Adicione pelo menos um membro da família.' };
+  const idadeInvalida = members.find(m => m.type === 'crianca' && m.age != null && !isValidChildAge(m.age));
+  if (idadeInvalida) return { members, error: `Idade inválida para ${idadeInvalida.name}.` };
+  return { members };
+}
 
 /** Calcula adultsCount e childrenCount a partir dos membros confirmados */
 function countFromMembers(members: FamilyMember[], status: string) {
@@ -25,37 +36,31 @@ function countFromMembers(members: FamilyMember[], status: string) {
 }
 
 export async function createGuest(data: {
-  name: string;
+  name?: string;
   phone?: string;
   status: string;
   origin: string;
   notes?: string;
-  familyMembers?: FamilyMember[];
-  adultsCount?: number;
-  childrenCount?: number;
+  familyMembers: FamilyMember[];
 }) {
   try {
-    if (!data.name.trim()) return { success: false, error: 'O nome é obrigatório.' };
+    const { members, error } = normalizeMembers(data.familyMembers);
+    if (error) return { success: false, error };
 
     const event = await db.event.findFirst();
     if (!event) return { success: false, error: 'Configure os dados do evento primeiro.' };
 
-    const members = data.familyMembers ?? [];
-    const counts = members.length > 0
-      ? countFromMembers(members, data.status)
-      : {
-          adultsCount:   data.status === 'confirmado' ? (data.adultsCount ?? 1) : 0,
-          childrenCount: data.status === 'confirmado' ? (data.childrenCount ?? 0) : 0,
-        };
+    const counts = countFromMembers(members, data.status);
 
     await db.guest.create({
       data: {
-        name:          data.name.trim(),
+        // Nome da família é opcional: sem ele, usa os nomes dos membros
+        name:          data.name?.trim() || familyNameFromMembers(members),
         phone:         data.phone?.trim() || '',
         status:        data.status || 'pendente',
         origin:        data.origin || 'manual',
         notes:         data.notes?.trim() || '',
-        familyMembers: members.length > 0 ? JSON.stringify(members) : null,
+        familyMembers: JSON.stringify(members),
         adultsCount:   counts.adultsCount,
         childrenCount: counts.childrenCount,
         respondedAt:   data.status !== 'pendente' ? new Date() : null,
@@ -74,28 +79,21 @@ export async function createGuest(data: {
 export async function updateGuest(
   id: string,
   data: {
-    name: string;
+    name?: string;
     phone?: string;
     status: string;
     notes?: string;
-    familyMembers?: FamilyMember[];
-    adultsCount?: number;
-    childrenCount?: number;
+    familyMembers: FamilyMember[];
   }
 ) {
   try {
-    if (!data.name.trim()) return { success: false, error: 'O nome é obrigatório.' };
+    const { members, error } = normalizeMembers(data.familyMembers);
+    if (error) return { success: false, error };
 
     const original = await db.guest.findUnique({ where: { id } });
     if (!original) return { success: false, error: 'Convidado não encontrado.' };
 
-    const members = data.familyMembers ?? [];
-    const counts = members.length > 0
-      ? countFromMembers(members, data.status)
-      : {
-          adultsCount:   data.status === 'confirmado' ? (data.adultsCount ?? 1) : 0,
-          childrenCount: data.status === 'confirmado' ? (data.childrenCount ?? 0) : 0,
-        };
+    const counts = countFromMembers(members, data.status);
 
     let respondedAt = original.respondedAt;
     if (data.status !== 'pendente' && original.status === 'pendente') respondedAt = new Date();
@@ -104,11 +102,11 @@ export async function updateGuest(
     await db.guest.update({
       where: { id },
       data: {
-        name:          data.name.trim(),
+        name:          data.name?.trim() || familyNameFromMembers(members),
         phone:         data.phone?.trim() || '',
         status:        data.status,
         notes:         data.notes?.trim() || '',
-        familyMembers: members.length > 0 ? JSON.stringify(members) : null,
+        familyMembers: JSON.stringify(members),
         adultsCount:   counts.adultsCount,
         childrenCount: counts.childrenCount,
         respondedAt,

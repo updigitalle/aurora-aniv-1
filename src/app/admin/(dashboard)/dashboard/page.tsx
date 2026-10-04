@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getInviteInfo } from '@/lib/invite';
+import { parseMembers, summarizeConfirmed, type FamilyMember } from '@/lib/guests';
 import { db } from '@/lib/db';
 import {
   Calendar, Users, Wallet, CheckSquare, Leaf, ArrowRight,
@@ -79,6 +80,14 @@ export default async function DashboardPage() {
   const confPessoas  = confirmed.reduce((s, g) => s + g.adultsCount + g.childrenCount, 0);
   const confAdultos  = confirmed.reduce((s, g) => s + g.adultsCount, 0);
   const confCriancas = confirmed.reduce((s, g) => s + g.childrenCount, 0);
+
+  // ── Buffet: até 5 anos e bebês de colo não pagam; famílias antigas sem membros contam como adultos ──
+  const buffet = summarizeConfirmed(confirmed.flatMap((g): FamilyMember[] => {
+    const members = parseMembers(g.familyMembers as string | null);
+    return members.length > 0
+      ? members
+      : Array.from({ length: g.adultsCount + g.childrenCount }, () => ({ name: g.name, type: 'adulto' as const, confirmed: true }));
+  }));
 
   // ── Budget (usa Payment model) ──
   const totalPlanned  = expenses.reduce((s, e) => s + e.plannedValue, 0);
@@ -212,16 +221,33 @@ export default async function DashboardPage() {
           <div className="flex gap-3">
             <div className="flex-1 bg-princess-pink-light border border-princess-lilac rounded-xl px-3 py-2 text-center">
               <p className="text-lg font-bold text-forest-sage-dark">{confAdultos}</p>
-              <p className="text-[10px] text-forest-sage-dark font-medium flex items-center justify-center gap-0.5 mt-0.5">
+              <p className="text-xs text-forest-sage-dark font-medium flex items-center justify-center gap-0.5 mt-0.5">
                 <User size={9} /> Adultos
               </p>
             </div>
             <div className="flex-1 bg-princess-gold-light border border-princess-gold/25 rounded-xl px-3 py-2 text-center">
               <p className="text-lg font-bold text-princess-gold-dark">{confCriancas}</p>
-              <p className="text-[10px] text-princess-gold font-medium flex items-center justify-center gap-0.5 mt-0.5">
+              <p className="text-xs text-princess-gold font-medium flex items-center justify-center gap-0.5 mt-0.5">
                 <Baby size={9} /> Crianças
               </p>
             </div>
+          </div>
+
+          {/* Buffet */}
+          <div className="rounded-xl bg-white border border-princess-pink px-3 py-2.5 text-sm">
+            <p className="flex items-baseline justify-between gap-2">
+              <span className="text-princess-text/70">Entram no buffet</span>
+              <span className="font-bold text-forest-sage-dark tabular-nums">{buffet.buffet}</span>
+            </p>
+            <p className="flex items-baseline justify-between gap-2 mt-0.5">
+              <span className="text-princess-text/70">Não pagam (até 5 anos e bebês)</span>
+              <span className="font-bold tabular-nums">{buffet.free}</span>
+            </p>
+            {buffet.ageMissing > 0 && (
+              <p className="text-xs text-princess-gold-dark mt-1.5">
+                {buffet.ageMissing} {buffet.ageMissing === 1 ? 'criança confirmada sem idade' : 'crianças confirmadas sem idade'}, contando no buffet
+              </p>
+            )}
           </div>
 
           {/* Pendentes + recusados */}
@@ -235,7 +261,7 @@ export default async function DashboardPage() {
           </div>
 
           <Link href="/admin/convidados"
-            className="flex items-center justify-center gap-1 text-xs text-princess-rose font-semibold hover:underline">
+            className="flex items-center justify-center gap-1 min-h-11 text-sm md:text-xs text-princess-rose font-semibold hover:underline">
             Ver todos <ArrowRight size={12} />
           </Link>
         </div>
@@ -260,13 +286,13 @@ export default async function DashboardPage() {
               <span className={`font-bold ${isOverBudget ? 'text-forest-berry' : 'text-princess-rose'}`}>{fmt(totalActual)}</span>
             </div>
             {totalPlanned > 0 && (
-              <p className="text-[11px] text-princess-text/40">{pctActual.toFixed(0)}% do previsto contratado</p>
+              <p className="text-xs text-princess-text/40">{pctActual.toFixed(0)}% do previsto contratado</p>
             )}
           </div>
 
           {/* Barra dupla */}
           <div className="space-y-1">
-            <div className="flex justify-between text-[11px] text-princess-text/50">
+            <div className="flex justify-between text-xs text-princess-text/50">
               <span className="text-forest-sage-dark font-semibold">Pago: {fmt(totalPaid)}</span>
               <span className="text-princess-gold font-semibold">Restante: {fmt(totalRem)}</span>
             </div>
@@ -278,14 +304,14 @@ export default async function DashboardPage() {
               <div className="absolute inset-y-0 left-0 rounded-full bg-princess-rose transition-all duration-700"
                 style={{ width: `${pctPaid}%` }} />
             </div>
-            <div className="flex items-center gap-3 text-[10px] text-princess-text/40">
+            <div className="flex items-center gap-3 text-xs text-princess-text/40">
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-princess-rose inline-block" /> Pago</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-princess-rose/25 inline-block" /> Contratado</span>
             </div>
           </div>
 
           <Link href="/admin/orcamento"
-            className="flex items-center justify-center gap-1 text-xs text-princess-rose font-semibold hover:underline">
+            className="flex items-center justify-center gap-1 min-h-11 text-sm md:text-xs text-princess-rose font-semibold hover:underline">
             Ver orçamento <ArrowRight size={12} />
           </Link>
         </div>
@@ -332,7 +358,7 @@ export default async function DashboardPage() {
           )}
 
           <Link href="/admin/tarefas"
-            className="flex items-center justify-center gap-1 text-xs text-princess-rose font-semibold hover:underline">
+            className="flex items-center justify-center gap-1 min-h-11 text-sm md:text-xs text-princess-rose font-semibold hover:underline">
             Ver checklist <ArrowRight size={12} />
           </Link>
         </div>
@@ -349,7 +375,7 @@ export default async function DashboardPage() {
             <h3 className="font-serif-display font-bold text-base text-princess-text flex items-center gap-2">
               <AlertTriangle size={16} className="text-forest-berry" /> Tarefas Urgentes
             </h3>
-            <Link href="/admin/tarefas" className="text-[11px] text-princess-rose font-bold hover:underline flex items-center gap-0.5">
+            <Link href="/admin/tarefas" className="text-sm md:text-xs text-princess-rose font-bold hover:underline flex items-center gap-0.5 min-h-11 -my-3 px-1">
               Ver todas <ArrowRight size={11} />
             </Link>
           </div>
@@ -362,12 +388,12 @@ export default async function DashboardPage() {
                   <div>
                     <p className="text-sm font-medium text-princess-text leading-snug">{task.title}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] font-bold text-forest-berry bg-[#f9ebe8] border border-[#f1d5cf] px-1.5 py-0.5 rounded uppercase tracking-wide">
+                      <span className="text-xs font-bold text-forest-berry bg-[#f9ebe8] border border-[#f1d5cf] px-1.5 py-0.5 rounded uppercase tracking-wide">
                         Alta
                       </span>
-                      <span className="text-[10px] text-princess-text/45">{task.category}</span>
+                      <span className="text-xs text-princess-text/45">{task.category}</span>
                       {task.dueDate && (
-                        <span className="text-[10px] text-princess-text/45 flex items-center gap-0.5">
+                        <span className="text-xs text-princess-text/45 flex items-center gap-0.5">
                           <Clock size={9} /> {new Date(task.dueDate).toLocaleDateString('pt-BR')}
                         </span>
                       )}
@@ -391,7 +417,7 @@ export default async function DashboardPage() {
             <h3 className="font-serif-display font-bold text-base text-princess-text flex items-center gap-2">
               <Leaf size={16} className="text-princess-gold" /> Últimos RSVPs
             </h3>
-            <Link href="/admin/convidados" className="text-[11px] text-princess-rose font-bold hover:underline flex items-center gap-0.5">
+            <Link href="/admin/convidados" className="text-sm md:text-xs text-princess-rose font-bold hover:underline flex items-center gap-0.5 min-h-11 -my-3 px-1">
               Ver todos <ArrowRight size={11} />
             </Link>
           </div>
@@ -401,7 +427,7 @@ export default async function DashboardPage() {
               <div key={g.id} className="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-princess-lavender/60 transition">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-princess-text truncate">{g.name}</p>
-                  <p className="text-[10px] text-princess-text/40 mt-0.5 flex items-center gap-1">
+                  <p className="text-xs text-princess-text/40 mt-0.5 flex items-center gap-1">
                     <Clock size={9} />
                     {fmtDateShort(g.respondedAt)}
                     <span className="ml-1 capitalize text-princess-text/30">{g.origin === 'rsvp_online' ? '· online' : '· manual'}</span>
@@ -410,21 +436,21 @@ export default async function DashboardPage() {
                 <div className="shrink-0 text-right">
                   {g.status === 'confirmado' && (
                     <>
-                      <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-forest-sage-dark bg-princess-pink-light border border-princess-lilac px-2 py-0.5 rounded-lg">
+                      <span className="inline-flex items-center gap-0.5 text-xs font-bold text-forest-sage-dark bg-princess-pink-light border border-princess-lilac px-2 py-0.5 rounded-lg">
                         <CheckCircle2 size={10} /> Confirmou
                       </span>
-                      <p className="text-[10px] text-princess-text/45 mt-0.5">
+                      <p className="text-xs text-princess-text/45 mt-0.5">
                         {g.adultsCount + g.childrenCount} {g.adultsCount + g.childrenCount === 1 ? 'pessoa' : 'pessoas'}
                       </p>
                     </>
                   )}
                   {g.status === 'nao_vai' && (
-                    <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-forest-berry bg-[#f9ebe8] border border-[#ebc6be] px-2 py-0.5 rounded-lg">
+                    <span className="inline-flex items-center gap-0.5 text-xs font-bold text-forest-berry bg-[#f9ebe8] border border-[#ebc6be] px-2 py-0.5 rounded-lg">
                       <XCircle size={10} /> Não vai
                     </span>
                   )}
                   {g.status === 'pendente' && (
-                    <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-princess-gold-dark bg-princess-gold-light border border-princess-gold/25 px-2 py-0.5 rounded-lg">
+                    <span className="inline-flex items-center gap-0.5 text-xs font-bold text-princess-gold-dark bg-princess-gold-light border border-princess-gold/25 px-2 py-0.5 rounded-lg">
                       <Clock size={10} /> Pendente
                     </span>
                   )}
@@ -446,7 +472,7 @@ export default async function DashboardPage() {
             <h3 className="font-serif-display font-bold text-base text-princess-text flex items-center gap-2">
               <Building2 size={16} className="text-princess-rose" /> Fornecedores
             </h3>
-            <Link href="/admin/fornecedores" className="text-[11px] text-princess-rose font-bold hover:underline flex items-center gap-0.5">
+            <Link href="/admin/fornecedores" className="text-sm md:text-xs text-princess-rose font-bold hover:underline flex items-center gap-0.5 min-h-11 -my-3 px-1">
               Ver todos <ArrowRight size={11} />
             </Link>
           </div>
@@ -460,7 +486,7 @@ export default async function DashboardPage() {
             ].map(s => (
               <div key={s.label} className={`rounded-xl border px-2 py-2 ${s.cls}`}>
                 <p className="text-lg font-bold">{s.count}</p>
-                <p className="text-[10px] font-semibold">{s.label}</p>
+                <p className="text-xs font-semibold">{s.label}</p>
               </div>
             ))}
           </div>
@@ -470,14 +496,14 @@ export default async function DashboardPage() {
               <div key={v.id} className="px-5 py-3 flex items-center justify-between hover:bg-princess-lavender/60 transition">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-princess-text truncate">{v.name}</p>
-                  <p className="text-[11px] text-princess-text/45 mt-0.5">{v.service}</p>
+                  <p className="text-xs text-princess-text/45 mt-0.5">{v.service}</p>
                 </div>
                 <div className="shrink-0 ml-2 text-right">
                   <span className="text-xs font-bold text-princess-gold-dark bg-princess-gold-light border border-princess-gold/25 px-2 py-0.5 rounded-lg">
                     A Cotar
                   </span>
                   {v.agreedValue > 0 && (
-                    <p className="text-[10px] text-princess-text/45 mt-0.5">{fmt(v.agreedValue)}</p>
+                    <p className="text-xs text-princess-text/45 mt-0.5">{fmt(v.agreedValue)}</p>
                   )}
                 </div>
               </div>

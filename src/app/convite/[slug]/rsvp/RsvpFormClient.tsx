@@ -6,8 +6,8 @@ import Link from 'next/link';
 import {
   ChevronLeft, ChevronRight, Check, Heart, Search, AlertCircle, X, Loader2, User, Baby,
 } from 'lucide-react';
+import { type FamilyMember as Member, MEMBER_TYPE_LABEL as TYPE_LABEL, isValidChildAge, MAX_CHILD_AGE } from '@/lib/guests';
 
-type Member = { name: string; type: 'adulto' | 'crianca' | 'bebe'; confirmed: boolean };
 type GuestResult = { id: string; name: string; status: string; members: Member[] };
 
 interface RsvpFormClientProps {
@@ -15,10 +15,6 @@ interface RsvpFormClientProps {
   babyName: string;
   deadline: string | null;
 }
-
-const TYPE_LABEL: Record<Member['type'], string> = {
-  adulto: 'Adulto', crianca: 'Criança', bebe: 'Bebê de colo',
-};
 
 export default function RsvpFormClient({ slug, babyName, deadline }: RsvpFormClientProps) {
   const [query, setQuery]       = useState('');
@@ -29,6 +25,7 @@ export default function RsvpFormClient({ slug, babyName, deadline }: RsvpFormCli
   // Família selecionada (popup)
   const [selected, setSelected] = useState<GuestResult | null>(null);
   const [checks, setChecks]     = useState<Record<number, boolean>>({});
+  const [ages, setAges]         = useState<Record<number, string>>({});
   const [phone, setPhone]       = useState('');
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
@@ -93,6 +90,10 @@ export default function RsvpFormClient({ slug, babyName, deadline }: RsvpFormCli
     const initial: Record<number, boolean> = {};
     g.members.forEach((_, i) => { initial[i] = true; });
     setChecks(initial);
+    // Idade já cadastrada pelos anfitriões vem preenchida
+    const initialAges: Record<number, string> = {};
+    g.members.forEach((m, i) => { if (isValidChildAge(m.age)) initialAges[i] = String(m.age); });
+    setAges(initialAges);
     setPhone('');
     setError('');
   };
@@ -105,7 +106,11 @@ export default function RsvpFormClient({ slug, babyName, deadline }: RsvpFormCli
     setError('');
     setLoading(true);
     try {
-      const members = selected.members.map((m, i) => ({ ...m, confirmed: !!checks[i] }));
+      const members = selected.members.map((m, i) => ({
+        ...m,
+        confirmed: !!checks[i],
+        ...(m.type === 'crianca' && { age: ages[i] ? Number(ages[i]) : null }),
+      }));
       const res = await fetch('/api/rsvp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -127,6 +132,9 @@ export default function RsvpFormClient({ slug, babyName, deadline }: RsvpFormCli
 
   const members = selected?.members ?? [];
   const anyChecked = Object.values(checks).some(Boolean);
+  // Toda criança marcada precisa de idade válida (até 5 anos não entra no buffet)
+  const childAgeOk = (i: number) => ages[i] !== undefined && ages[i] !== '' && isValidChildAge(Number(ages[i]));
+  const missingAge = members.some((m, i) => m.type === 'crianca' && checks[i] && !childAgeOk(i));
   const showResults = query.trim().length >= 2;
 
   const backLink = (
@@ -252,21 +260,41 @@ export default function RsvpFormClient({ slug, babyName, deadline }: RsvpFormCli
             {members.length > 0 && (
               <div className="rsvp-members">
                 {members.map((m, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    role="checkbox"
-                    aria-checked={!!checks[i]}
-                    onClick={() => toggle(i)}
-                    className={`rsvp-member ${checks[i] ? 'is-on' : ''}`}
-                  >
-                    <span className="rsvp-check" aria-hidden>{checks[i] && <Check size={14} strokeWidth={3} />}</span>
-                    {m.type === 'adulto'
-                      ? <User size={16} className="rsvp-member-icon" aria-hidden />
-                      : <Baby size={16} className="rsvp-member-icon" aria-hidden />}
-                    <span className="rsvp-member-name">{m.name}</span>
-                    <span className="rsvp-member-type">{TYPE_LABEL[m.type]}</span>
-                  </button>
+                  <div key={i} className="rsvp-member-block">
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={!!checks[i]}
+                      onClick={() => toggle(i)}
+                      className={`rsvp-member ${checks[i] ? 'is-on' : ''}`}
+                    >
+                      <span className="rsvp-check" aria-hidden>{checks[i] && <Check size={14} strokeWidth={3} />}</span>
+                      {m.type === 'adulto'
+                        ? <User size={16} className="rsvp-member-icon" aria-hidden />
+                        : <Baby size={16} className="rsvp-member-icon" aria-hidden />}
+                      <span className="rsvp-member-name">{m.name}</span>
+                      <span className="rsvp-member-type">{TYPE_LABEL[m.type]}</span>
+                    </button>
+
+                    {m.type === 'crianca' && checks[i] && (
+                      <div className="rsvp-age">
+                        <label htmlFor={`rsvp-age-${i}`}>Idade de {m.name}</label>
+                        <input
+                          id={`rsvp-age-${i}`}
+                          type="number"
+                          inputMode="numeric"
+                          min={0}
+                          max={MAX_CHILD_AGE}
+                          required
+                          value={ages[i] ?? ''}
+                          onChange={e => setAges(prev => ({ ...prev, [i]: e.target.value }))}
+                          aria-invalid={ages[i] !== undefined && ages[i] !== '' && !childAgeOk(i)}
+                          className="rsvp-input rsvp-input-plain"
+                        />
+                        <span>anos</span>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
@@ -286,6 +314,10 @@ export default function RsvpFormClient({ slug, babyName, deadline }: RsvpFormCli
               <span className="rsvp-help">Para enviarmos o local e o horário.</span>
             </div>
 
+            {missingAge && (
+              <p className="rsvp-help rsvp-age-hint">Informe a idade de cada criança para confirmar.</p>
+            )}
+
             {error && (
               <p className="rsvp-error" role="alert">
                 <AlertCircle size={16} aria-hidden /> {error}
@@ -296,7 +328,7 @@ export default function RsvpFormClient({ slug, babyName, deadline }: RsvpFormCli
               <button
                 type="button"
                 onClick={() => submit('confirmado')}
-                disabled={loading || (members.length > 0 && !anyChecked)}
+                disabled={loading || (members.length > 0 && !anyChecked) || missingAge}
                 className="rsvp-btn rsvp-btn-primary"
               >
                 {loading ? <Loader2 size={18} className="rsvp-spin" aria-hidden /> : <Check size={18} strokeWidth={2.6} aria-hidden />}

@@ -966,3 +966,29 @@ body {
   margin-top: 1.25rem;
   text-decoration: none;
 }
+
+/* Idade da criança no RSVP: aparece abaixo do membro marcado */
+.rsvp-member-block { display: grid; gap: 0.4rem; }
+
+.rsvp-age {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.25rem 0.25rem 2.9rem;
+  font-family: var(--font-convite-detalhe), sans-serif;
+  font-size: 0.9rem;
+  color: var(--convite-brown);
+}
+
+.rsvp-age label { flex: 1; color: var(--convite-ink); }
+
+.rsvp-age .rsvp-input {
+  width: 5rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+}
+
+.rsvp-age .rsvp-input[aria-invalid="true"] { border-color: var(--color-forest-berry); }
+
+.rsvp-age-hint { margin: -0.25rem 0 0.75rem; text-align: center; color: var(--convite-brown); }
