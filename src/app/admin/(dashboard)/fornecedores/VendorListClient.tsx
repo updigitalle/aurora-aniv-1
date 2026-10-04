@@ -274,7 +274,7 @@ export default function VendorListClient({ initialVendors }: Props) {
                   <div>
                     <h3 className="font-serif-display font-bold text-lg text-princess-text leading-tight">{vendor.name}</h3>
                     {methodLabel && (
-                      <span className="text-[11px] text-princess-text/50 flex items-center gap-1 mt-0.5">
+                      <span className="text-xs text-princess-text/50 flex items-center gap-1 mt-0.5">
                         <span>{methodLabel.icon}</span> {methodLabel.label}
                       </span>
                     )}
@@ -316,7 +316,7 @@ export default function VendorListClient({ initialVendors }: Props) {
                   {/* Datas de pagamento (pix parcelado) */}
                   {vendor.paymentMethod === 'pix_parcelado' && payDates.length > 0 && (
                     <div className="bg-princess-gold-light border border-princess-gold/25 rounded-xl p-3 space-y-1.5">
-                      <p className="text-[11px] font-bold text-princess-gold-dark flex items-center gap-1 uppercase tracking-wide">
+                      <p className="text-xs font-bold text-princess-gold-dark flex items-center gap-1 uppercase tracking-wide">
                         <CalendarCheck size={11} /> Parcelas Pix
                       </p>
                       {payDates.map((d: string) => (
@@ -328,9 +328,9 @@ export default function VendorListClient({ initialVendors }: Props) {
                             const dd = new Date(d);
                             return Math.abs(pd.getTime() - dd.getTime()) < 2 * 86400000;
                           }) ? (
-                            <span className="text-[10px] text-forest-sage-dark font-bold flex items-center gap-0.5"><CheckCircle size={10} /> Pago</span>
+                            <span className="text-xs text-forest-sage-dark font-bold flex items-center gap-0.5"><CheckCircle size={10} /> Pago</span>
                           ) : (
-                            <span className="text-[10px] text-princess-gold">Pendente</span>
+                            <span className="text-xs text-princess-gold">Pendente</span>
                           )}
                         </div>
                       ))}
@@ -338,10 +338,10 @@ export default function VendorListClient({ initialVendors }: Props) {
                   )}
 
                   {/* Contatos */}
-                  <div className="text-sm text-princess-text/70 space-y-1.5 border-t border-princess-pink-light/30 pt-3">
+                  <div className="text-sm text-princess-text/70 md:space-y-1.5 border-t border-princess-pink-light/30 pt-1 md:pt-3">
                     {vendor.phone ? (
                       <a href={`https://wa.me/${waPhone}`} target="_blank" rel="noreferrer"
-                        className="flex items-center gap-2 hover:text-princess-rose hover:underline">
+                        className="flex items-center gap-2 min-h-11 md:min-h-0 hover:text-princess-rose hover:underline">
                         <Smartphone size={13} className="text-princess-rose" /> {vendor.phone}
                       </a>
                     ) : (
@@ -351,8 +351,8 @@ export default function VendorListClient({ initialVendors }: Props) {
                     )}
                     {vendor.email ? (
                       <a href={`mailto:${vendor.email}`}
-                        className="flex items-center gap-2 hover:text-princess-rose hover:underline truncate">
-                        <Mail size={13} className="text-princess-rose" /> {vendor.email}
+                        className="flex items-center gap-2 min-h-11 md:min-h-0 min-w-0 hover:text-princess-rose hover:underline">
+                        <Mail size={13} className="text-princess-rose shrink-0" /> <span className="truncate">{vendor.email}</span>
                       </a>
                     ) : (
                       <span className="flex items-center gap-2 text-princess-text/35">
@@ -410,20 +410,20 @@ export default function VendorListClient({ initialVendors }: Props) {
                   {vendor.status !== 'pago' ? (
                     <button
                       onClick={() => openPayModal(vendor)}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-princess-rose hover:bg-princess-pink-dark px-3 py-1.5 rounded-lg shadow-sm transition"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-princess-rose hover:bg-princess-pink-dark px-3 py-2.5 md:py-1.5 rounded-lg shadow-sm transition"
                     >
                       <Wallet size={12} /> Confirmar Pagamento
                     </button>
                   ) : (
                     hasExpense ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-forest-sage-dark bg-princess-pink-light px-2.5 py-1.5 rounded-lg border border-princess-lilac">
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-forest-sage-dark bg-princess-pink-light px-2.5 py-1.5 rounded-lg border border-princess-lilac">
                         <CheckCircle size={12} /> Quitado
                       </span>
                     ) : (
                       <button
                         onClick={() => createExpenseFromVendor(vendor.id)}
                         disabled={isPending}
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-princess-rose bg-princess-pink-light hover:bg-princess-lilac/30 px-2.5 py-1.5 rounded-lg transition disabled:opacity-50"
+                        className="inline-flex items-center gap-1 text-xs font-bold text-princess-rose bg-princess-pink-light hover:bg-princess-lilac/30 px-2.5 py-1.5 rounded-lg transition disabled:opacity-50"
                       >
                         <Coins size={12} /> Gerar Despesa
                       </button>
@@ -432,10 +432,10 @@ export default function VendorListClient({ initialVendors }: Props) {
 
                   {/* Editar / Excluir */}
                   <div className="flex items-center gap-1">
-                    <button onClick={() => openEdit(vendor)} className="p-1.5 text-princess-text/50 hover:text-princess-rose hover:bg-princess-pink-light/30 rounded-lg transition" title="Editar">
+                    <button onClick={() => openEdit(vendor)} className="w-11 h-11 md:w-auto md:h-auto md:p-1.5 grid place-items-center text-princess-text/50 hover:text-princess-rose hover:bg-princess-pink-light/30 rounded-lg transition" title="Editar" aria-label="Editar">
                       <Edit2 size={14} />
                     </button>
-                    <button onClick={() => handleDelete(vendor.id)} className="p-1.5 text-princess-text/50 hover:text-forest-berry hover:bg-[#f9ebe8] rounded-lg transition" title="Excluir">
+                    <button onClick={() => handleDelete(vendor.id)} className="w-11 h-11 md:w-auto md:h-auto md:p-1.5 grid place-items-center text-princess-text/50 hover:text-forest-berry hover:bg-[#f9ebe8] rounded-lg transition" title="Excluir" aria-label="Excluir">
                       <Trash2 size={14} />
                     </button>
                   </div>
@@ -463,7 +463,7 @@ export default function VendorListClient({ initialVendors }: Props) {
 
           <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 princess-card-shadow border border-princess-pink-light/40 relative z-10">
             <button onClick={() => setVendorModal(false)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg border border-princess-pink-light text-princess-rose hover:bg-princess-pink-light/30 transition">
+              className="absolute top-3 right-3 w-11 h-11 grid place-items-center rounded-xl border border-princess-pink-light text-princess-rose hover:bg-princess-pink-light/30 transition">
               <X size={16} />
             </button>
 
@@ -581,7 +581,7 @@ export default function VendorListClient({ initialVendors }: Props) {
                     </button>
                   </div>
                   {fPayDates.length === 0 && (
-                    <p className="text-[11px] text-princess-gold">Adicione pelo menos uma data de pagamento.</p>
+                    <p className="text-xs text-princess-gold">Adicione pelo menos uma data de pagamento.</p>
                   )}
                 </div>
               )}
@@ -629,7 +629,7 @@ export default function VendorListClient({ initialVendors }: Props) {
 
             <div className="bg-white rounded-2xl w-full max-w-md p-6 princess-card-shadow border border-princess-pink-light/40 relative z-10">
               <button onClick={() => setPayModal(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-lg border border-princess-pink-light text-princess-rose hover:bg-princess-pink-light/30 transition">
+                className="absolute top-3 right-3 w-11 h-11 grid place-items-center rounded-xl border border-princess-pink-light text-princess-rose hover:bg-princess-pink-light/30 transition">
                 <X size={16} />
               </button>
 
