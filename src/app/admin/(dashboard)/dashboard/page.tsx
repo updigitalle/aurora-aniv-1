@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getInviteInfo } from '@/lib/invite';
+import { parseMembers, summarizeConfirmed, type FamilyMember } from '@/lib/guests';
 import { db } from '@/lib/db';
 import {
   Calendar, Users, Wallet, CheckSquare, Leaf, ArrowRight,
@@ -77,6 +78,14 @@ export default async function DashboardPage() {
   const confPessoas  = confirmed.reduce((s, g) => s + g.adultsCount + g.childrenCount, 0);
   const confAdultos  = confirmed.reduce((s, g) => s + g.adultsCount, 0);
   const confCriancas = confirmed.reduce((s, g) => s + g.childrenCount, 0);
+
+  // ── Buffet: até 5 anos e bebês de colo não pagam; famílias antigas sem membros contam como adultos ──
+  const buffet = summarizeConfirmed(confirmed.flatMap((g): FamilyMember[] => {
+    const members = parseMembers(g.familyMembers as string | null);
+    return members.length > 0
+      ? members
+      : Array.from({ length: g.adultsCount + g.childrenCount }, () => ({ name: g.name, type: 'adulto' as const, confirmed: true }));
+  }));
 
   // ── Budget (usa Payment model) ──
   const totalPlanned  = expenses.reduce((s, e) => s + e.plannedValue, 0);
@@ -220,6 +229,23 @@ export default async function DashboardPage() {
                 <Baby size={9} /> Crianças
               </p>
             </div>
+          </div>
+
+          {/* Buffet */}
+          <div className="rounded-xl bg-white border border-princess-pink px-3 py-2.5 text-sm">
+            <p className="flex items-baseline justify-between gap-2">
+              <span className="text-princess-text/70">Entram no buffet</span>
+              <span className="font-bold text-forest-sage-dark tabular-nums">{buffet.buffet}</span>
+            </p>
+            <p className="flex items-baseline justify-between gap-2 mt-0.5">
+              <span className="text-princess-text/70">Não pagam (até 5 anos e bebês)</span>
+              <span className="font-bold tabular-nums">{buffet.free}</span>
+            </p>
+            {buffet.ageMissing > 0 && (
+              <p className="text-xs text-princess-gold-dark mt-1.5">
+                {buffet.ageMissing} {buffet.ageMissing === 1 ? 'criança confirmada sem idade' : 'crianças confirmadas sem idade'}, contando no buffet
+              </p>
+            )}
           </div>
 
           {/* Pendentes + recusados */}

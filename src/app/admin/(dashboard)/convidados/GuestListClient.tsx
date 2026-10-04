@@ -2,7 +2,11 @@
 
 import React, { useState, useTransition } from 'react';
 import { Guest } from '@prisma/client';
-import { createGuest, updateGuest, deleteGuest, FamilyMember } from './actions';
+import { createGuest, updateGuest, deleteGuest } from './actions';
+import {
+  type FamilyMember, type MemberType, parseMembers, summarizeConfirmed, isValidChildAge,
+  FREE_UNTIL_AGE, MAX_CHILD_AGE,
+} from '@/lib/guests';
 import {
   Users, Search, Plus, Download, Trash2, Edit2, X,
   CheckCircle2, XCircle, Clock, AlertCircle, Leaf,
@@ -11,8 +15,25 @@ import {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const parseMember = (raw: string | null): FamilyMember[] => {
-  try { return raw ? JSON.parse(raw) : []; } catch { return []; }
+const parseMember = (raw: string | null): FamilyMember[] => parseMembers(raw);
+
+// "Lia · 4 anos"; criança confirmada sem idade fica sinalizada para o buffet
+const memberLabel = (m: FamilyMember) => {
+  if (m.type !== 'crianca') return m.name;
+  if (isValidChildAge(m.age)) return `${m.name} · ${m.age} ${m.age === 1 ? 'ano' : 'anos'}`;
+  return m.confirmed ? `${m.name} · idade?` : m.name;
+};
+
+/** Resumo do buffet das famílias confirmadas (famílias antigas sem membros contam como adultos). */
+const buffetOf = (guests: Guest[]) => {
+  const all: FamilyMember[] = [];
+  for (const g of guests) {
+    if (g.status !== 'confirmado') continue;
+    const members = parseMember(g.familyMembers as string | null);
+    if (members.length > 0) all.push(...members);
+    else for (let i = 0; i < g.adultsCount + g.childrenCount; i++) all.push({ name: g.name, type: 'adulto', confirmed: true });
+  }
+  return summarizeConfirmed(all);
 };
 
 const STATUS_CONFIG = {
@@ -52,10 +73,8 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
   const [fNotes,    setFNotes]    = useState('');
   const [fMembers,  setFMembers]  = useState<FamilyMember[]>([]);
   const [fNewName,  setFNewName]  = useState('');
-  const [fNewType,  setFNewType]  = useState<'adulto' | 'crianca' | 'bebe'>('adulto');
-  // Contagens manuais (quando não há membros)
-  const [fAdults,   setFAdults]   = useState(1);
-  const [fChildren, setFChildren] = useState(0);
+  const [fNewType,  setFNewType]  = useState<MemberType>('adulto');
+  const [fNewAge,   setFNewAge]   = useState('');
   const [fError,    setFError]    = useState('');
 
   // ─── Estatísticas ─────────────────────────────────────────────────────────
@@ -66,6 +85,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
     confirmadosAdultos: guests.filter(g => g.status === 'confirmado').reduce((s, g) => s + g.adultsCount, 0),
     confirmadosCriancas:guests.filter(g => g.status === 'confirmado').reduce((s, g) => s + g.childrenCount, 0),
     pendentes:          guests.filter(g => g.status === 'pendente').length,
+    buffet:             buffetOf(guests),
     recusados:          guests.filter(g => g.status === 'nao_vai').length,
   };
 
@@ -87,8 +107,8 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
 
   const resetForm = () => {
     setFName(''); setFPhone(''); setFStatus('pendente'); setFOrigin('rsvp_online');
-    setFNotes(''); setFMembers([]); setFNewName(''); setFNewType('adulto');
-    setFAdults(1); setFChildren(0); setFError('');
+    setFNotes(''); setFMembers([]); setFNewName(''); setFNewType('adulto'); setFNewAge('');
+    setFError('');
   };
 
   const openAdd = () => { resetForm(); setEditing(null); setModalOpen(true); };
@@ -99,15 +119,28 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
     setFStatus(g.status); setFOrigin(g.origin);
     setFNotes(g.notes || '');
     setFMembers(parseMember(g.familyMembers as string | null));
-    setFAdults(g.adultsCount || 1); setFChildren(g.childrenCount || 0);
-    setFNewName(''); setFNewType('adulto'); setFError('');
+    setFNewName(''); setFNewType('adulto'); setFNewAge(''); setFError('');
     setModalOpen(true);
   };
 
+  // Membro digitado no campo (ainda não adicionado à lista), ou o erro que impede adicioná-lo
+  const draftMember = (): { member?: FamilyMember; error?: string } => {
+    if (!fNewName.trim()) return {};
+    const member: FamilyMember = { name: fNewName.trim(), type: fNewType, confirmed: fStatus === 'confirmado' };
+    if (fNewType === 'crianca' && fNewAge !== '') {
+      const age = Number(fNewAge);
+      if (!isValidChildAge(age)) return { error: `A idade deve ser um número de 0 a ${MAX_CHILD_AGE}.` };
+      member.age = age;
+    }
+    return { member };
+  };
+
   const addMember = () => {
-    if (!fNewName.trim()) return;
-    setFMembers(prev => [...prev, { name: fNewName.trim(), type: fNewType, confirmed: fStatus === 'confirmado' }]);
-    setFNewName('');
+    const { member, error } = draftMember();
+    if (error) { setFError(error); return; }
+    if (!member) return;
+    setFMembers(prev => [...prev, member]);
+    setFNewName(''); setFNewAge(''); setFError('');
   };
 
   const removeMember = (i: number) => setFMembers(prev => prev.filter((_, idx) => idx !== i));
@@ -122,13 +155,15 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFError('');
-    if (!fName.trim()) { setFError('O nome é obrigatório.'); return; }
+    // Inclui o membro que ficou digitado sem clicar em "+"
+    const { member, error } = draftMember();
+    if (error) { setFError(error); return; }
+    const members = member ? [...fMembers, member] : fMembers;
+    if (members.length === 0) { setFError('Adicione pelo menos um membro da família.'); return; }
 
     const payload = {
       name: fName, phone: fPhone, status: fStatus, origin: fOrigin, notes: fNotes,
-      familyMembers: fMembers.length > 0 ? fMembers : undefined,
-      adultsCount:   fMembers.length > 0 ? undefined : fAdults,
-      childrenCount: fMembers.length > 0 ? undefined : fChildren,
+      familyMembers: members,
     };
 
     startTransition(async () => {
@@ -152,7 +187,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
   // ─── Export CSV ───────────────────────────────────────────────────────────
 
   const exportCSV = () => {
-    const headers = ['Nome/Família','Membros','Contato','Adultos','Crianças','Status','Origem','Observações','Respondeu em'];
+    const headers = ['Nome/Família','Membros','Contato','Adultos','Crianças','Idades das crianças','No buffet','Status','Origem','Observações','Respondeu em'];
     const rows = filtered.map(g => {
       const members = parseMember(g.familyMembers as string | null);
       return [
@@ -161,6 +196,8 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
         g.phone || '',
         g.adultsCount,
         g.childrenCount,
+        members.filter(m => m.type === 'crianca').map(m => `${m.name}: ${isValidChildAge(m.age) ? m.age : '?'}`).join(' | '),
+        g.status === 'confirmado' ? buffetOf([g]).buffet : '',
         g.status === 'confirmado' ? 'Confirmado' : g.status === 'nao_vai' ? 'Não vai' : 'Pendente',
         g.origin === 'rsvp_online' ? 'RSVP Online' : 'Manual',
         g.notes || '',
@@ -230,6 +267,15 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
             <span>·</span>
             <span className="flex items-center gap-0.5 whitespace-nowrap"><Baby size={10} /> {stats.confirmadosCriancas} crianças</span>
           </div>
+          <p className="text-xs text-princess-text/70 pt-1.5 mt-1.5 border-t border-princess-lilac">
+            <span className="font-bold text-forest-sage-dark">{stats.buffet.buffet}</span> no buffet ·{' '}
+            <span className="font-bold">{stats.buffet.free}</span> não pagam
+            {stats.buffet.ageMissing > 0 && (
+              <span className="block text-princess-gold-dark mt-0.5">
+                {stats.buffet.ageMissing} {stats.buffet.ageMissing === 1 ? 'criança sem idade' : 'crianças sem idade'} (contando no buffet)
+              </span>
+            )}
+          </p>
         </div>
 
         {/* Aguardando */}
@@ -360,7 +406,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                               : 'bg-white text-princess-text/60 border-princess-pink/30'
                           }`}>
                           {m.type === 'adulto' ? <User size={13} /> : <Baby size={13} />}
-                          {m.name}
+                          {memberLabel(m)}
                           {m.confirmed && <CheckCircle2 size={13} className="text-princess-rose" />}
                         </span>
                       ))}
@@ -514,7 +560,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                                     : 'bg-white text-princess-text/60 border-princess-pink/30'
                                 }`}>
                                 {m.type === 'adulto' ? <User size={11} /> : <Baby size={11} />}
-                                {m.name}
+                                {memberLabel(m)}
                                 {m.confirmed && <CheckCircle2 size={11} className="text-princess-rose" />}
                               </span>
                             ))}
@@ -585,9 +631,11 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
 
               {/* Nome */}
               <div>
-                <label className="block text-xs font-semibold text-princess-text/75 mb-1">Nome / Família *</label>
-                <input value={fName} onChange={e => setFName(e.target.value)} required
-                  placeholder="Ex: Família Tamasse, Vovó Maria, Tio Roberto e Família"
+                <label htmlFor="guest-name" className="block text-xs font-semibold text-princess-text/75 mb-1">
+                  Nome da família <span className="text-princess-text/45 font-normal">(opcional)</span>
+                </label>
+                <input id="guest-name" value={fName} onChange={e => setFName(e.target.value)}
+                  placeholder="Ex: Família Tamasse. Vazio: usamos os nomes dos membros"
                   className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
               </div>
 
@@ -632,8 +680,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
               <div className="border border-princess-pink/25 rounded-2xl p-4 space-y-3 bg-princess-pink-light/10">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-bold text-princess-rose uppercase tracking-wide flex items-center gap-1.5">
-                    <Users size={13} /> Membros da Família
-                    <span className="text-princess-text/40 font-normal normal-case">(opcional)</span>
+                    <Users size={13} /> Membros da família *
                   </p>
                   {fMembers.length > 0 && (
                     <span className="text-xs text-princess-text/50">
@@ -656,7 +703,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                         onClick={() => toggleMemberConfirmed(i)}
                         title="Clique para marcar/desmarcar presença">
                         {m.type === 'adulto' ? <User size={11} /> : <Baby size={11} />}
-                        {m.name}
+                        {memberLabel(m)}
                         {m.confirmed && <CheckCircle2 size={11} className="text-princess-rose" />}
                         <button type="button" onClick={e => { e.stopPropagation(); removeMember(i); }}
                           className="ml-0.5 text-princess-text/40 hover:text-forest-berry rounded-full p-0.5">
@@ -673,41 +720,28 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                     onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addMember())}
                     placeholder="Nome do membro..."
                     className="flex-1 px-3 py-2 bg-white border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
-                  <select value={fNewType} onChange={e => setFNewType(e.target.value as 'adulto' | 'crianca' | 'bebe')}
+                  <select value={fNewType} onChange={e => setFNewType(e.target.value as MemberType)}
                     className="px-2 py-2 bg-white border border-princess-rose/20 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-princess-rose/30 font-medium text-princess-text/70">
                     <option value="adulto">Adulto</option>
                     <option value="crianca">Criança</option>
-                    <option value="bebe">Bebê</option>
+                    <option value="bebe">Bebê de colo</option>
                   </select>
+                  {fNewType === 'crianca' && (
+                    <input type="number" inputMode="numeric" min={0} max={MAX_CHILD_AGE} value={fNewAge}
+                      onChange={e => setFNewAge(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addMember())}
+                      placeholder="Idade" aria-label="Idade da criança"
+                      className="w-20 px-2 py-2 bg-white border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                  )}
                   <button type="button" onClick={addMember}
                     className="px-3 py-2 bg-princess-rose hover:opacity-90 text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
                     <Plus size={13} />
                   </button>
                 </div>
                 <p className="text-xs text-princess-text/45">
-                  Clique em um membro para marcar/desmarcar presença. Os totais de adultos e crianças são calculados automaticamente. Bebês não entram na contagem de vagas.
+                  Clique em um membro para marcar ou desmarcar presença. A idade da criança é opcional aqui; no RSVP o convidado precisa informar. Até {FREE_UNTIL_AGE} anos e bebês de colo não entram no buffet.
                 </p>
               </div>
-
-              {/* Contagens manuais (só se não tiver membros) */}
-              {fMembers.length === 0 && fStatus === 'confirmado' && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-princess-text/75 mb-1 flex items-center gap-1">
-                      <User size={11} className="text-princess-rose" /> Adultos confirmados
-                    </label>
-                    <input type="number" min={0} value={fAdults} onChange={e => setFAdults(Number(e.target.value))}
-                      className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-princess-text/75 mb-1 flex items-center gap-1">
-                      <Baby size={11} className="text-princess-rose" /> Crianças confirmadas
-                    </label>
-                    <input type="number" min={0} value={fChildren} onChange={e => setFChildren(Number(e.target.value))}
-                      className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
-                  </div>
-                </div>
-              )}
 
               {/* Observações */}
               <div>
