@@ -20,6 +20,9 @@ model Event {
   description      String?
   bgImage          String?
   giftSuggestions  String?
+  rsvpDeadline     DateTime?
+  timeConfirmed    Boolean  @default(false)
+  revealLocationAfterRsvp Boolean @default(true)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   guests           Guest[]

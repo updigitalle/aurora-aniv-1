@@ -16,6 +16,10 @@ export async function updateEventConfig(
     description?: string;
     bgImage?: string;
     giftSuggestions?: string;
+    // Campos do convite (opcionais: quem não enviar mantém o valor salvo)
+    rsvpDeadline?: string | null;
+    timeConfirmed?: boolean;
+    revealLocationAfterRsvp?: boolean;
   }
 ) {
   try {
@@ -24,6 +28,10 @@ export async function updateEventConfig(
     }
 
     const slugRegex = /^[a-z0-9-]+$/;
+    if (data.rsvpDeadline && Number.isNaN(new Date(data.rsvpDeadline).getTime())) {
+      return { success: false, error: 'Prazo de confirmação inválido.' };
+    }
+
     if (!slugRegex.test(data.slug.trim())) {
       return { success: false, error: 'O link (slug) deve conter apenas letras minúsculas, números e hífens.' };
     }
@@ -49,6 +57,13 @@ export async function updateEventConfig(
         description: data.description?.trim() || '',
         bgImage: data.bgImage?.trim() || '',
         giftSuggestions: data.giftSuggestions?.trim() || '',
+        ...(data.rsvpDeadline !== undefined && {
+          rsvpDeadline: data.rsvpDeadline ? new Date(data.rsvpDeadline) : null,
+        }),
+        ...(data.timeConfirmed !== undefined && { timeConfirmed: data.timeConfirmed }),
+        ...(data.revealLocationAfterRsvp !== undefined && {
+          revealLocationAfterRsvp: data.revealLocationAfterRsvp,
+        }),
       },
     });
 
