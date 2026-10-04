@@ -10,7 +10,7 @@ import {
 import {
   Users, Search, Plus, Download, Trash2, Edit2, X,
   CheckCircle2, XCircle, Clock, AlertCircle, Leaf,
-  Smartphone, Baby, User, UserCheck, ChevronDown, ChevronUp,
+  Smartphone, Baby, User, UserCheck, ChevronDown, ChevronUp, Link2, Check,
 } from 'lucide-react';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -49,9 +49,24 @@ const ORIGIN_CONFIG = {
 
 // ─── Componente ───────────────────────────────────────────────────────────────
 
-export default function GuestListClient({ initialGuests }: { initialGuests: Guest[] }) {
+export default function GuestListClient({ initialGuests, eventSlug }: { initialGuests: Guest[]; eventSlug: string | null }) {
   const [guests] = useState<Guest[]>(initialGuests);
   const [isPending, startTransition] = useTransition();
+
+  // Link que os convidados recebem para se cadastrar e confirmar presença
+  const [linkCopied, setLinkCopied] = useState(false);
+  const copyRsvpLink = async () => {
+    if (!eventSlug) return;
+    const url = `${window.location.origin}/convite/${eventSlug}/rsvp`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      window.prompt('Copie o link de confirmação:', url);
+      return;
+    }
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2500);
+  };
 
   // Filtros
   const [search,     setSearch]     = useState('');
@@ -235,7 +250,14 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
           </h2>
           <p className="text-sm text-princess-text/60">Famílias, membros e confirmações de presença</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {eventSlug && (
+            <button onClick={copyRsvpLink}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white border border-princess-rose/20 text-princess-rose hover:bg-princess-pink-light/30 rounded-xl font-medium shadow-sm transition text-sm">
+              {linkCopied ? <Check size={15} /> : <Link2 size={15} />}
+              {linkCopied ? 'Link copiado!' : 'Copiar link de confirmação'}
+            </button>
+          )}
           <button onClick={exportCSV}
             className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white border border-princess-rose/20 text-princess-rose hover:bg-princess-pink-light/30 rounded-xl font-medium shadow-sm transition text-sm">
             <Download size={15} /> Exportar CSV

@@ -8,11 +8,13 @@ export const dynamic = 'force-dynamic';
 
 export default async function ConvidadosPage() {
   let guests = [] as Awaited<ReturnType<typeof db.guest.findMany>>;
+  let slug: string | null = null;
   try {
     guests = await db.guest.findMany({ orderBy: { name: 'asc' } });
+    slug = (await db.event.findFirst({ select: { slug: true } }))?.slug ?? null;
   } catch (err: unknown) {
     console.error('[Convidados] DB error:', err instanceof Error ? err.message : String(err));
   }
 
-  return <GuestListClient initialGuests={guests} />;
+  return <GuestListClient initialGuests={guests} eventSlug={slug} />;
 }

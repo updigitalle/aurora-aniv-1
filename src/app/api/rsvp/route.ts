@@ -1,131 +1,89 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
-import { type FamilyMember as Member, parseMembers, isValidChildAge, countsFromMembers } from '@/lib/guests';
+import { type FamilyMember, isValidChildAge, countsFromMembers, familyNameFromMembers } from '@/lib/guests';
 
-// ─── Busca de convidados pré-cadastrados (somente quem está na lista) ──────────
-// GET /api/rsvp?slug=<slug>&q=<termo>
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const slug = searchParams.get('slug') || '';
-    const q = (searchParams.get('q') || '').trim();
+// Limites para o formulário público (o link é aberto, qualquer um com ele pode enviar)
+const MAX_PEOPLE = 15;
+const MAX_NAME = 80;
 
-    if (!slug) return NextResponse.json({ error: 'Evento inválido.' }, { status: 400 });
-    if (q.length < 2) return NextResponse.json({ results: [] });
+type SentMember = { name?: unknown; type?: unknown; age?: unknown };
 
-    const event = await db.event.findUnique({ where: { slug } });
-    if (!event) return NextResponse.json({ error: 'Evento não encontrado.' }, { status: 404 });
-
-    // Busca pelo nome da família OU pelo nome de um membro (guardado no JSON).
-    const guests = await db.guest.findMany({
-      where: {
-        eventId: event.id,
-        OR: [
-          { name:          { contains: q, mode: 'insensitive' } },
-          { familyMembers: { contains: q, mode: 'insensitive' } },
-        ],
-      },
-      orderBy: { name: 'asc' },
-      take: 20,
-    });
-
-    const results = guests.map(g => ({
-      id: g.id,
-      name: g.name,
-      status: g.status,
-      members: parseMembers(g.familyMembers as string | null),
-    }));
-
-    return NextResponse.json({ results });
-  } catch (error) {
-    console.error('Erro na busca de RSVP:', error);
-    return NextResponse.json({ error: 'Erro ao buscar. Tente novamente.' }, { status: 500 });
-  }
-}
-
-// ─── Confirmação de presença (somente convidados já cadastrados) ───────────────
-// POST /api/rsvp  { guestId, status, members?, phone? }
+// ─── Confirmação de presença pelo link ─────────────────────────────────────────
+// O convidado cadastra quem vai: nome, adulto ou criança e, se criança, a idade.
+// POST /api/rsvp  { slug, status, members: [{ name, type, age? }], phone?, website? }
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { guestId, status, members, phone } = body as {
-      guestId?: string;
+    const { slug, status, members, phone, website } = body as {
+      slug?: string;
       status?: string;
-      members?: Member[];
+      members?: SentMember[];
       phone?: string;
+      website?: string;
     };
 
-    if (!guestId) {
-      return NextResponse.json(
-        { error: 'Convidado não identificado. Busque seu nome na lista.' },
-        { status: 400 }
-      );
-    }
+    // Campo invisível: só robôs preenchem. Finge sucesso para não dar pista.
+    if (website) return NextResponse.json({ success: true });
+
+    if (!slug) return NextResponse.json({ error: 'Evento inválido.' }, { status: 400 });
     if (status !== 'confirmado' && status !== 'nao_vai') {
       return NextResponse.json({ error: 'Confirmação inválida.' }, { status: 400 });
     }
 
-    const guest = await db.guest.findUnique({ where: { id: guestId } });
-    if (!guest) {
+    const event = await db.event.findUnique({ where: { slug } });
+    if (!event) return NextResponse.json({ error: 'Evento não encontrado.' }, { status: 404 });
+
+    // Limpa a lista: só adulto ou criança; idade apenas para criança
+    const list: FamilyMember[] = (Array.isArray(members) ? members : [])
+      .map(m => {
+        const name = typeof m?.name === 'string' ? m.name.trim().replace(/\s+/g, ' ').slice(0, MAX_NAME) : '';
+        const type = m?.type === 'crianca' ? 'crianca' : 'adulto';
+        const age = typeof m?.age === 'number' ? m.age : m?.age === '' || m?.age == null ? null : Number(m.age);
+        return {
+          name,
+          type,
+          confirmed: status === 'confirmado',
+          ...(type === 'crianca' && { age: isValidChildAge(age) ? age : null }),
+        } as FamilyMember;
+      })
+      .filter(m => m.name);
+
+    if (list.length === 0) {
+      return NextResponse.json({ error: 'Informe pelo menos um nome.' }, { status: 400 });
+    }
+    if (list.length > MAX_PEOPLE) {
       return NextResponse.json(
-        { error: 'Não encontramos seu cadastro. Fale com os anfitriões.' },
-        { status: 404 }
+        { error: `Envie no máximo ${MAX_PEOPLE} pessoas por confirmação.` },
+        { status: 400 }
       );
     }
 
-    // Membros originais (fonte da verdade — não confiamos só no que vem do cliente)
-    const original = parseMembers(guest.familyMembers as string | null);
-
-    // Marca confirmados conforme a escolha; nenhum membro novo pode ser criado aqui.
-    const sent = new Map((members ?? []).map(m => [`${m.type}::${m.name}`, m]));
-    const updatedMembers: Member[] = original.map(m => {
-      const choice = sent.get(`${m.type}::${m.name}`);
-      const confirmed = status === 'confirmado' && !!choice?.confirmed;
-      // Idade só vale para criança confirmada; mantém a já cadastrada se o convidado não reenviar
-      const age = m.type === 'crianca' && confirmed
-        ? (isValidChildAge(choice?.age) ? choice!.age : m.age ?? null)
-        : m.age ?? null;
-      return { ...m, confirmed, ...(m.type === 'crianca' && { age }) };
-    });
-
-    // Toda criança confirmada precisa de idade: até 5 anos não entra no buffet
+    // Toda criança que vai precisa de idade: até 5 anos não entra no buffet
     if (status === 'confirmado') {
-      const semIdade = updatedMembers.find(m => m.type === 'crianca' && m.confirmed && !isValidChildAge(m.age));
+      const semIdade = list.find(m => m.type === 'crianca' && !isValidChildAge(m.age));
       if (semIdade) {
-        return NextResponse.json(
-          { error: `Informe a idade de ${semIdade.name}.` },
-          { status: 400 }
-        );
-      }
-      if (original.length > 0 && !updatedMembers.some(m => m.confirmed)) {
-        return NextResponse.json({ error: 'Marque quem vai comparecer.' }, { status: 400 });
+        return NextResponse.json({ error: `Informe a idade de ${semIdade.name}.` }, { status: 400 });
       }
     }
 
-    // Contagem: bebês NÃO ocupam vaga.
-    const counts = countsFromMembers(updatedMembers, status);
+    const counts = countsFromMembers(list, status);
 
-    // Se não há membros cadastrados (família "avulsa"), confirma a família inteira.
-    const adultsCount = original.length === 0 && status === 'confirmado'
-      ? Math.max(1, guest.adultsCount || 1)
-      : counts.adultsCount;
-    const childrenCount = original.length === 0 ? guest.childrenCount : counts.childrenCount;
-
-    const updated = await db.guest.update({
-      where: { id: guestId },
+    const guest = await db.guest.create({
       data: {
+        name: familyNameFromMembers(list),
+        phone: typeof phone === 'string' ? phone.trim().slice(0, 30) : '',
         status,
         origin: 'rsvp_online',
-        phone: phone?.trim() ? phone.trim() : guest.phone,
-        familyMembers: original.length > 0 ? JSON.stringify(updatedMembers) : guest.familyMembers,
-        adultsCount: status === 'confirmado' ? adultsCount : 0,
-        childrenCount: status === 'confirmado' ? childrenCount : 0,
+        familyMembers: JSON.stringify(list),
+        adultsCount: counts.adultsCount,
+        childrenCount: counts.childrenCount,
         respondedAt: new Date(),
+        eventId: event.id,
       },
     });
 
-    return NextResponse.json({ success: true, guest: { id: updated.id, name: updated.name, status: updated.status } });
+    return NextResponse.json({ success: true, guest: { id: guest.id, name: guest.name, status: guest.status } });
   } catch (error) {
     console.error('Erro no processamento do RSVP:', error);
     return NextResponse.json(
