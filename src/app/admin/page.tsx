@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { TreePine, Heart, Sparkles, Lock } from 'lucide-react';
+import { Lock, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,13 +26,12 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Redireciona para o dashboard se logado com sucesso
         router.push('/admin/dashboard');
         router.refresh();
       } else {
         setError(data.error || 'Senha incorreta.');
       }
-    } catch (err) {
+    } catch {
       setError('Erro de conexão. Tente novamente.');
     } finally {
       setLoading(false);
@@ -39,81 +39,58 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen w-full flex items-center justify-center princess-gradient p-4 relative overflow-hidden">
-      {/* Decorative magical elements */}
-      <div className="absolute top-10 left-10 text-princess-pink-dark animate-float opacity-30">
-        <TreePine size={48} />
-      </div>
-      <div className="absolute bottom-10 right-10 text-princess-gold animate-float opacity-30" style={{ animationDelay: '1.5s' }}>
-        <Sparkles size={48} />
-      </div>
-      <div className="absolute top-1/4 right-1/4 text-princess-rose animate-sparkle-1 opacity-20">
-        <Heart size={24} />
-      </div>
-      <div className="absolute bottom-1/4 left-1/4 text-princess-gold-dark animate-sparkle-2 opacity-25">
-        <Sparkles size={20} />
-      </div>
+    <main className="min-h-dvh w-full flex items-center justify-center gingham-bg px-4 py-10">
+      <div className="w-full max-w-sm flex flex-col items-center painel-enter">
+        <Image
+          src="/convite/brasao.webp"
+          alt="Brasão do bosque encantado da Aurora"
+          width={502}
+          height={502}
+          priority
+          unoptimized
+          className="w-44 sm:w-52 h-auto drop-shadow-sm"
+        />
 
-      <div className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-2xl p-8 princess-card-shadow gold-border relative z-10">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-princess-pink-light gold-border text-princess-rose mb-3 animate-float">
-            <TreePine size={32} className="text-princess-rose" />
-          </div>
-          <h1 className="font-serif-display text-3xl font-bold text-princess-text">
-            Painel da Aurora
-          </h1>
-          <p className="text-sm text-princess-text/70 mt-2">
-            Digite a senha mágica para entrar no bosque
-          </p>
-        </div>
+        <h1 className="font-serif-display text-3xl text-forest-sage mt-4 text-center">Painel da Aurora</h1>
+        <p className="text-sm text-princess-text/75 mt-1 text-center">Digite a senha para entrar no bosque</p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full mt-6 p-6 bg-[#fbfaf6]/90 backdrop-blur-sm border border-princess-pink rounded-3xl princess-card-shadow space-y-5"
+        >
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-princess-text/80 mb-2">
-              Senha de Acesso
+            <label htmlFor="password" className="block text-sm font-semibold text-princess-text mb-2">
+              Senha de acesso
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-princess-rose/60">
-                <Lock size={18} />
-              </span>
+              <Lock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-forest-olive pointer-events-none" />
               <input
                 id="password"
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Senha mágica..."
                 required
-                className="block w-full pl-10 pr-4 py-3 bg-white/50 border border-princess-rose/30 rounded-xl text-princess-text placeholder-princess-text/40 focus:outline-none focus:ring-2 focus:ring-princess-rose/40 focus:border-princess-rose transition duration-200"
+                className="block w-full min-h-12 pl-11 pr-4 bg-white border border-princess-lilac rounded-2xl text-base text-princess-text placeholder:text-princess-text/40 focus:outline-none focus:ring-4 focus:ring-princess-rose/20 focus:border-princess-rose transition"
               />
             </div>
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-600 shrink-0"></span>
+            <p role="alert" className="flex items-center gap-2 p-3 bg-[#f9ebe8] text-[#8a2f22] rounded-2xl text-sm border border-[#f1d5cf]">
+              <AlertCircle size={16} className="shrink-0" />
               {error}
-            </div>
+            </p>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-princess-rose to-princess-pink-dark hover:from-princess-pink-dark hover:to-princess-rose text-white font-medium rounded-xl shadow-md hover:shadow-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-princess-rose/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full min-h-12 bg-princess-rose hover:bg-princess-pink-dark active:scale-[0.98] text-white font-semibold rounded-full shadow-sm transition focus:outline-none focus-visible:ring-4 focus-visible:ring-princess-rose/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading ? (
-              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            ) : (
-              <>
-                Entrar no Reino
-                <Sparkles size={16} />
-              </>
-            )}
+            {loading ? <Loader2 size={18} className="animate-spin" /> : 'Entrar'}
           </button>
         </form>
-
-        <div className="mt-8 text-center text-xs text-princess-text/40 flex items-center justify-center gap-1">
-          Feito com <Heart size={10} className="text-princess-rose fill-princess-rose" /> para Aurora
-        </div>
       </div>
     </main>
   );

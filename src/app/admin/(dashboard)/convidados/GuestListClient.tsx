@@ -5,7 +5,7 @@ import { Guest } from '@prisma/client';
 import { createGuest, updateGuest, deleteGuest, FamilyMember } from './actions';
 import {
   Users, Search, Plus, Download, Trash2, Edit2, X,
-  CheckCircle2, XCircle, Clock, AlertCircle, Sparkles,
+  CheckCircle2, XCircle, Clock, AlertCircle, Leaf,
   Smartphone, Baby, User, UserCheck, ChevronDown, ChevronUp,
 } from 'lucide-react';
 
@@ -16,14 +16,14 @@ const parseMember = (raw: string | null): FamilyMember[] => {
 };
 
 const STATUS_CONFIG = {
-  confirmado: { label: 'Confirmado', cls: 'text-emerald-700 bg-emerald-50 border-emerald-200', icon: CheckCircle2 },
-  nao_vai:    { label: 'Não vai',    cls: 'text-red-600 bg-red-50 border-red-200',             icon: XCircle },
-  pendente:   { label: 'Pendente',   cls: 'text-amber-700 bg-amber-50 border-amber-200',       icon: Clock },
+  confirmado: { label: 'Confirmado', cls: 'text-forest-sage-dark bg-princess-pink-light border-princess-lilac', icon: CheckCircle2 },
+  nao_vai:    { label: 'Não vai',    cls: 'text-forest-berry bg-[#f9ebe8] border-[#ebc6be]',             icon: XCircle },
+  pendente:   { label: 'Pendente',   cls: 'text-princess-gold-dark bg-princess-gold-light border-princess-gold/25',       icon: Clock },
 };
 
 const ORIGIN_CONFIG = {
-  manual:      { label: 'Manual',      cls: 'text-purple-700 bg-purple-50 border-purple-200' },
-  rsvp_online: { label: 'RSVP Online', cls: 'text-blue-700 bg-blue-50 border-blue-200' },
+  manual:      { label: 'Manual',      cls: 'text-princess-gold-dark bg-princess-gold-light border-princess-gold/25' },
+  rsvp_online: { label: 'RSVP Online', cls: 'text-forest-sage-dark bg-princess-pink-light border-princess-lilac' },
 };
 
 // ─── Componente ───────────────────────────────────────────────────────────────
@@ -178,7 +178,12 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
   };
 
   const toggleExpand = (id: string) =>
-    setExpanded(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+    setExpanded(prev => {
+      const s = new Set(prev);
+      if (s.has(id)) s.delete(id);
+      else s.add(id);
+      return s;
+    });
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
@@ -199,7 +204,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
             <Download size={15} /> Exportar CSV
           </button>
           <button onClick={openAdd}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-princess-rose to-princess-pink-dark hover:opacity-90 text-white rounded-xl font-medium shadow-md transition text-sm">
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-princess-rose hover:bg-princess-pink-dark text-white rounded-xl font-medium shadow-md transition text-sm">
             <Plus size={15} /> Novo Convidado
           </button>
         </div>
@@ -215,12 +220,12 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
         </div>
 
         {/* Confirmados */}
-        <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 princess-card-shadow space-y-1">
-          <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1">
+        <div className="bg-princess-pink-light p-5 rounded-2xl border border-princess-lilac princess-card-shadow space-y-1">
+          <span className="text-[11px] font-bold text-forest-sage-dark uppercase tracking-wider flex items-center gap-1">
             <UserCheck size={11} /> Confirmados
           </span>
-          <p className="text-3xl font-serif-display font-bold text-emerald-600">{stats.confirmadosTotal}</p>
-          <div className="flex items-center gap-2 text-[11px] text-emerald-500 mt-0.5">
+          <p className="text-3xl font-serif-display font-bold text-forest-sage-dark">{stats.confirmadosTotal}</p>
+          <div className="flex items-center gap-2 text-[11px] text-princess-rose mt-0.5">
             <span className="flex items-center gap-0.5"><User size={10} /> {stats.confirmadosAdultos} adultos</span>
             <span>·</span>
             <span className="flex items-center gap-0.5"><Baby size={10} /> {stats.confirmadosCriancas} crianças</span>
@@ -228,21 +233,21 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
         </div>
 
         {/* Aguardando */}
-        <div className="bg-amber-50 p-5 rounded-2xl border border-amber-100 princess-card-shadow space-y-1">
-          <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
+        <div className="bg-princess-gold-light p-5 rounded-2xl border border-princess-gold/25 princess-card-shadow space-y-1">
+          <span className="text-[11px] font-bold text-princess-gold-dark uppercase tracking-wider flex items-center gap-1">
             <Clock size={11} /> Aguardando
           </span>
-          <p className="text-3xl font-serif-display font-bold text-amber-600">{stats.pendentes}</p>
-          <p className="text-[11px] text-amber-500">{stats.pendentes === 1 ? 'família' : 'famílias'} sem resposta</p>
+          <p className="text-3xl font-serif-display font-bold text-princess-gold">{stats.pendentes}</p>
+          <p className="text-[11px] text-princess-gold">{stats.pendentes === 1 ? 'família' : 'famílias'} sem resposta</p>
         </div>
 
         {/* Recusados */}
-        <div className="bg-red-50 p-5 rounded-2xl border border-red-100 princess-card-shadow space-y-1">
-          <span className="text-[11px] font-bold text-red-500 uppercase tracking-wider flex items-center gap-1">
+        <div className="bg-[#f9ebe8] p-5 rounded-2xl border border-[#f1d5cf] princess-card-shadow space-y-1">
+          <span className="text-[11px] font-bold text-forest-berry uppercase tracking-wider flex items-center gap-1">
             <XCircle size={11} /> Recusados
           </span>
-          <p className="text-3xl font-serif-display font-bold text-red-500">{stats.recusados}</p>
-          <p className="text-[11px] text-red-400">{stats.recusados === 1 ? 'família não vai' : 'famílias não vão'}</p>
+          <p className="text-3xl font-serif-display font-bold text-forest-berry">{stats.recusados}</p>
+          <p className="text-[11px] text-forest-berry">{stats.recusados === 1 ? 'família não vai' : 'famílias não vão'}</p>
         </div>
       </div>
 
@@ -253,13 +258,13 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-princess-rose/50" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por família ou membro..."
-            className="w-full pl-9 pr-4 py-2 bg-[#FAF9F6] border border-princess-rose/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+            className="w-full pl-9 pr-4 py-2 bg-princess-lavender border border-princess-rose/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
         </div>
 
         {/* Filtros status + origem */}
         <div className="flex flex-wrap gap-2">
           {/* Status */}
-          <div className="flex items-center gap-1 bg-[#FAF9F6] border border-princess-rose/10 rounded-xl px-3 py-1.5">
+          <div className="flex items-center gap-1 bg-princess-lavender border border-princess-rose/10 rounded-xl px-3 py-1.5">
             <CheckCircle2 size={12} className="text-princess-rose" />
             <select value={statusF} onChange={e => setStatusF(e.target.value)}
               className="bg-transparent text-xs font-semibold text-princess-text/75 focus:outline-none cursor-pointer">
@@ -270,7 +275,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
             </select>
           </div>
           {/* Origem */}
-          <div className="flex items-center gap-1 bg-[#FAF9F6] border border-princess-rose/10 rounded-xl px-3 py-1.5">
+          <div className="flex items-center gap-1 bg-princess-lavender border border-princess-rose/10 rounded-xl px-3 py-1.5">
             <Smartphone size={12} className="text-princess-rose" />
             <select value={originF} onChange={e => setOriginF(e.target.value)}
               className="bg-transparent text-xs font-semibold text-princess-text/75 focus:outline-none cursor-pointer">
@@ -309,7 +314,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
 
                 return (
                   <React.Fragment key={g.id}>
-                    <tr className="hover:bg-[#FAF9F6]/60 transition group">
+                    <tr className="hover:bg-princess-lavender/60 transition group">
                       {/* Nome */}
                       <td className="px-4 py-3.5">
                         <div className="font-semibold text-princess-text">{g.name}</div>
@@ -382,7 +387,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                             <Edit2 size={14} />
                           </button>
                           <button onClick={() => handleDelete(g.id)}
-                            className="p-1.5 text-princess-text/60 hover:text-red-500 hover:bg-red-50 rounded-lg transition" title="Excluir">
+                            className="p-1.5 text-princess-text/60 hover:text-forest-berry hover:bg-[#f9ebe8] rounded-lg transition" title="Excluir">
                             <Trash2 size={14} />
                           </button>
                         </div>
@@ -398,12 +403,12 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                               <span key={i}
                                 className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full border ${
                                   m.confirmed
-                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    ? 'bg-princess-pink-light text-forest-sage-dark border-princess-lilac'
                                     : 'bg-white text-princess-text/60 border-princess-pink/30'
                                 }`}>
                                 {m.type === 'adulto' ? <User size={11} /> : <Baby size={11} />}
                                 {m.name}
-                                {m.confirmed && <CheckCircle2 size={11} className="text-emerald-500" />}
+                                {m.confirmed && <CheckCircle2 size={11} className="text-princess-rose" />}
                               </span>
                             ))}
                           </div>
@@ -465,7 +470,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
             </button>
 
             <h3 className="font-serif-display font-bold text-lg text-princess-text mb-5 flex items-center gap-1.5">
-              <Sparkles size={16} className="text-princess-gold" />
+              <Leaf size={16} className="text-princess-gold" />
               {editing ? 'Editar Convidado' : 'Novo Convidado / Família'}
             </h3>
 
@@ -476,7 +481,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                 <label className="block text-xs font-semibold text-princess-text/75 mb-1">Nome / Família *</label>
                 <input value={fName} onChange={e => setFName(e.target.value)} required
                   placeholder="Ex: Família Tamasse, Vovó Maria, Tio Roberto e Família"
-                  className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                  className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
               </div>
 
               {/* Contato + Status + Origem */}
@@ -484,12 +489,12 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                 <div>
                   <label className="block text-xs font-semibold text-princess-text/75 mb-1">WhatsApp</label>
                   <input value={fPhone} onChange={e => setFPhone(e.target.value)} placeholder="11999998888"
-                    className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                    className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-princess-text/75 mb-1">Status</label>
                   <select value={fStatus} onChange={e => setFStatus(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30">
+                    className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30">
                     <option value="pendente">Pendente</option>
                     <option value="confirmado">Confirmado</option>
                     <option value="nao_vai">Não vai</option>
@@ -508,7 +513,7 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                       className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border text-xs font-medium transition ${
                         fOrigin === o.val
                           ? 'bg-princess-rose text-white border-princess-rose'
-                          : 'bg-[#FAF9F6] text-princess-text/65 border-princess-rose/15 hover:border-princess-rose/40'
+                          : 'bg-princess-lavender text-princess-text/65 border-princess-rose/15 hover:border-princess-rose/40'
                       }`}>
                       {o.icon} {o.label}
                     </button>
@@ -538,16 +543,16 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                       <div key={i}
                         className={`inline-flex items-center gap-1.5 text-xs font-medium pl-2.5 pr-1.5 py-1 rounded-full border cursor-pointer select-none transition ${
                           m.confirmed
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                            ? 'bg-princess-pink-light text-forest-sage-dark border-princess-lilac'
                             : 'bg-white text-princess-text/65 border-princess-pink/30'
                         }`}
                         onClick={() => toggleMemberConfirmed(i)}
                         title="Clique para marcar/desmarcar presença">
                         {m.type === 'adulto' ? <User size={11} /> : <Baby size={11} />}
                         {m.name}
-                        {m.confirmed && <CheckCircle2 size={11} className="text-emerald-500" />}
+                        {m.confirmed && <CheckCircle2 size={11} className="text-princess-rose" />}
                         <button type="button" onClick={e => { e.stopPropagation(); removeMember(i); }}
-                          className="ml-0.5 text-princess-text/40 hover:text-red-500 rounded-full p-0.5">
+                          className="ml-0.5 text-princess-text/40 hover:text-forest-berry rounded-full p-0.5">
                           <X size={10} />
                         </button>
                       </div>
@@ -585,14 +590,14 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                       <User size={11} className="text-princess-rose" /> Adultos confirmados
                     </label>
                     <input type="number" min={0} value={fAdults} onChange={e => setFAdults(Number(e.target.value))}
-                      className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                      className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-princess-text/75 mb-1 flex items-center gap-1">
                       <Baby size={11} className="text-princess-rose" /> Crianças confirmadas
                     </label>
                     <input type="number" min={0} value={fChildren} onChange={e => setFChildren(Number(e.target.value))}
-                      className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                      className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
                   </div>
                 </div>
               )}
@@ -602,23 +607,23 @@ export default function GuestListClient({ initialGuests }: { initialGuests: Gues
                 <label className="block text-xs font-semibold text-princess-text/75 mb-1">Observações / Restrições Alimentares</label>
                 <textarea value={fNotes} onChange={e => setFNotes(e.target.value)} rows={2}
                   placeholder="Ex: Gabriel é alérgico a amendoim..."
-                  className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30 resize-none" />
+                  className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30 resize-none" />
               </div>
 
               {fError && (
-                <p className="text-xs text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 flex items-center gap-1.5">
+                <p className="text-xs text-forest-berry bg-[#f9ebe8] p-3 rounded-xl border border-[#f1d5cf] flex items-center gap-1.5">
                   <AlertCircle size={13} /> {fError}
                 </p>
               )}
 
               <div className="flex justify-end gap-3 pt-1">
                 <button type="button" onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 text-sm text-princess-text/60 hover:bg-gray-50 rounded-xl transition">
+                  className="px-4 py-2 text-sm text-princess-text/60 hover:bg-princess-lavender rounded-xl transition">
                   Cancelar
                 </button>
                 <button type="submit" disabled={isPending}
-                  className="px-5 py-2 text-sm bg-gradient-to-r from-princess-rose to-princess-pink-dark hover:opacity-90 text-white rounded-xl font-medium shadow-sm transition disabled:opacity-50 flex items-center gap-1.5">
-                  {isPending ? 'Salvando...' : 'Salvar Convidado'} <Sparkles size={13} />
+                  className="px-5 py-2 text-sm bg-princess-rose hover:bg-princess-pink-dark text-white rounded-xl font-medium shadow-sm transition disabled:opacity-50 flex items-center gap-1.5">
+                  {isPending ? 'Salvando...' : 'Salvar Convidado'} <Leaf size={13} />
                 </button>
               </div>
             </form>

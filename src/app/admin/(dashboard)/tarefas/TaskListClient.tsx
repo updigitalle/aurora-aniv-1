@@ -13,7 +13,7 @@ import {
   AlertCircle,
   Tag,
   Filter,
-  Sparkles
+  Leaf
 } from 'lucide-react';
 
 interface TaskListClientProps {
@@ -123,11 +123,11 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'alta':
-        return <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-red-50 text-red-500 border border-red-100 uppercase">Alta</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-[#f9ebe8] text-forest-berry border border-[#f1d5cf] uppercase">Alta</span>;
       case 'media':
-        return <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-50 text-princess-gold-dark border border-princess-gold-light uppercase">Média</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-princess-gold-light text-princess-gold-dark border border-princess-gold-light uppercase">Média</span>;
       default:
-        return <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-gray-50 text-gray-500 border border-gray-200 uppercase">Baixa</span>;
+        return <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-princess-lavender text-princess-text/60 border border-princess-pink uppercase">Baixa</span>;
     }
   };
 
@@ -143,7 +143,7 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
         </div>
         <button
           onClick={() => setIsAdding(!isAdding)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-princess-rose to-princess-pink-dark hover:from-princess-pink-dark hover:to-princess-rose text-white rounded-xl font-medium shadow-md transition duration-200 text-sm"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-princess-rose hover:bg-princess-pink-dark text-white rounded-xl font-medium shadow-md transition duration-200 text-sm"
         >
           {isAdding ? 'Fechar Formulário' : 'Nova Tarefa'}
           <Plus size={16} className={`transition-transform duration-200 ${isAdding ? 'rotate-45' : ''}`} />
@@ -154,7 +154,7 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
       {isAdding && (
         <form onSubmit={handleCreate} className="bg-white rounded-2xl p-6 princess-card-shadow border border-princess-pink-light/40 space-y-4 animate-in slide-in-from-top duration-200">
           <h3 className="font-serif-display font-bold text-lg text-princess-text flex items-center gap-1.5">
-            <Sparkles size={16} className="text-princess-gold" /> Adicionar Nova Tarefa
+            <Leaf size={16} className="text-princess-gold" /> Adicionar Nova Tarefa
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -166,7 +166,7 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
                 value={newTitle}
                 onChange={e => setNewTitle(e.target.value)}
                 placeholder="Ex: Encomendar o bolo de aniversário..."
-                className="w-full px-3 py-2 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/30 text-sm"
+                className="w-full px-3 py-2 bg-princess-lavender border border-princess-rose/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/30 text-sm"
               />
             </div>
 
@@ -176,7 +176,7 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
               <select
                 value={newCategory}
                 onChange={e => setNewCategory(e.target.value)}
-                className="w-full px-3 py-2 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/30 text-sm"
+                className="w-full px-3 py-2 bg-princess-lavender border border-princess-rose/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/30 text-sm"
               >
                 {CATEGORIES.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -190,7 +190,7 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
               <select
                 value={newPriority}
                 onChange={e => setNewPriority(e.target.value)}
-                className="w-full px-3 py-2 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/30 text-sm"
+                className="w-full px-3 py-2 bg-princess-lavender border border-princess-rose/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/30 text-sm"
               >
                 <option value="alta">Alta</option>
                 <option value="media">Média</option>
@@ -205,13 +205,13 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
                 type="date"
                 value={newDueDate}
                 onChange={e => setNewDueDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/30 text-sm"
+                className="w-full px-3 py-2 bg-princess-lavender border border-princess-rose/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/30 text-sm"
               />
             </div>
           </div>
 
           {formError && (
-            <p className="text-xs text-red-500 bg-red-50 p-2 rounded-lg border border-red-100 flex items-center gap-1.5">
+            <p className="text-xs text-forest-berry bg-[#f9ebe8] p-2 rounded-lg border border-[#f1d5cf] flex items-center gap-1.5">
               <AlertCircle size={14} /> {formError}
             </p>
           )}
@@ -220,7 +220,7 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
             <button
               type="button"
               onClick={() => setIsAdding(false)}
-              className="px-4 py-2 text-sm text-princess-text/60 hover:bg-gray-50 rounded-xl transition"
+              className="px-4 py-2 text-sm text-princess-text/60 hover:bg-princess-lavender rounded-xl transition"
             >
               Cancelar
             </button>
@@ -247,14 +247,14 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Pesquisar tarefas..."
-            className="w-full pl-9 pr-4 py-2 bg-[#FAF9F6] border border-princess-rose/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/30 text-sm"
+            className="w-full pl-9 pr-4 py-2 bg-princess-lavender border border-princess-rose/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/30 text-sm"
           />
         </div>
 
         {/* Botões de Filtros */}
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           {/* Categoria */}
-          <div className="flex items-center gap-1.5 bg-[#FAF9F6] border border-princess-rose/10 rounded-xl px-3 py-1.5 text-sm">
+          <div className="flex items-center gap-1.5 bg-princess-lavender border border-princess-rose/10 rounded-xl px-3 py-1.5 text-sm">
             <Tag size={14} className="text-princess-rose" />
             <select
               value={selectedCategory}
@@ -269,7 +269,7 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
           </div>
 
           {/* Status */}
-          <div className="flex items-center bg-[#FAF9F6] border border-princess-rose/10 rounded-xl p-1 text-sm">
+          <div className="flex items-center bg-princess-lavender border border-princess-rose/10 rounded-xl p-1 text-sm">
             <button
               onClick={() => setStatusFilter('todos')}
               className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${
@@ -306,7 +306,7 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
               <div
                 key={task.id}
                 className={`p-4 flex items-center justify-between gap-4 group transition ${
-                  task.completed ? 'bg-princess-pink-light/10 opacity-70' : 'hover:bg-[#FAF9F6]'
+                  task.completed ? 'bg-princess-pink-light/10 opacity-70' : 'hover:bg-princess-lavender'
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -344,7 +344,7 @@ export default function TaskListClient({ initialTasks }: TaskListClientProps) {
 
                 <button
                   onClick={() => handleDelete(task.id)}
-                  className="p-2 text-princess-text/40 hover:text-red-500 hover:bg-red-50 rounded-xl transition duration-150 shrink-0 md:opacity-0 group-hover:opacity-100"
+                  className="p-2 text-princess-text/40 hover:text-forest-berry hover:bg-[#f9ebe8] rounded-xl transition duration-150 shrink-0 md:opacity-0 group-hover:opacity-100"
                   title="Excluir tarefa"
                 >
                   <Trash2 size={16} />

@@ -1,10 +1,12 @@
 import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { getInviteInfo } from '@/lib/invite';
 import { db } from '@/lib/db';
 import {
-  Calendar, Users, Wallet, CheckSquare, Sparkles, ArrowRight,
-  MapPin, Clock, Crown, AlertTriangle, CheckCircle2, XCircle,
-  Building2, Baby, User, TrendingUp, PartyPopper, Star,
+  Calendar, Users, Wallet, CheckSquare, Leaf, ArrowRight,
+  MapPin, Clock, TreePine, AlertTriangle, CheckCircle2, XCircle,
+  Building2, Baby, User, TrendingUp, PartyPopper,
 } from 'lucide-react';
 
 export const revalidate = 30;
@@ -13,12 +15,6 @@ export const revalidate = 30;
 
 const fmt = (v: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
-
-const fmtDateLong = (d: Date) =>
-  new Date(d).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
-
-const fmtTime = (d: Date) =>
-  new Date(d).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
 const fmtDateShort = (d: Date | null) =>
   d ? new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '';
@@ -58,6 +54,8 @@ async function getData() {
 
 export default async function DashboardPage() {
   const { event, guests, tasks, expenses, vendors } = await getData();
+
+  const info = event ? getInviteInfo(event) : null;
 
   // ── Countdown ──
   let daysLeft = 0;
@@ -108,97 +106,85 @@ export default async function DashboardPage() {
     <div className="space-y-6">
 
       {/* ════════════════════════════════════════════════════════════════════
-          HERO — Título + Countdown
+          HERO: brasão, dados do convite e contagem regressiva
       ════════════════════════════════════════════════════════════════════ */}
-      <div className="relative bg-gradient-to-br from-[#F9EDEA] via-white to-[#EFF2E8] rounded-3xl p-6 md:p-8 border border-princess-pink/30 princess-card-shadow overflow-hidden">
-        {/* Decorações de fundo */}
-        <div className="absolute top-4 right-8 text-princess-pink/20 animate-sparkle-1 pointer-events-none">
-          <Crown size={56} />
-        </div>
-        <div className="absolute bottom-4 left-6 text-princess-gold/15 animate-sparkle-2 pointer-events-none">
-          <Sparkles size={40} />
-        </div>
-        <div className="absolute top-6 right-28 text-princess-rose/10 pointer-events-none">
-          <Star size={24} />
-        </div>
+      <section className="relative bg-[#fbfaf6]/90 rounded-3xl border border-princess-pink princess-card-shadow overflow-hidden">
+        <div className="grid gap-6 p-5 sm:p-7 lg:p-8 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center">
+          <Image
+            src="/convite/brasao.webp"
+            alt=""
+            width={502}
+            height={502}
+            priority
+            unoptimized
+            className="w-32 sm:w-36 lg:w-44 h-auto mx-auto md:mx-0 drop-shadow-sm"
+          />
 
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-          {/* Info do evento */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-princess-rose bg-princess-pink-light/70 border border-princess-pink/30 px-3 py-1.5 rounded-full">
-                <Sparkles size={12} className="animate-spin" style={{ animationDuration: '6s' }} />
-                O Reino Está em Preparação
-              </div>
-            </div>
-
+          <div className="text-center md:text-left space-y-3 min-w-0">
             <div>
-              <h1 className="font-serif-display text-3xl md:text-4xl font-bold text-princess-text leading-tight">
-                Aniversário da{' '}
-                <span className="text-princess-rose">{event?.babyName || 'Aurora'}</span>
+              <h1 className="font-serif-display text-3xl lg:text-4xl text-forest-sage leading-tight">
+                1º aniversário da {event?.babyName || 'Aurora'}
               </h1>
-              <p className="text-princess-text/55 text-sm mt-1 font-medium">
-                {event?.name || 'Configure o evento nas Configurações'}
+              <p className="text-princess-text/70 text-sm mt-1">
+                {event ? 'Era uma vez… um bosque encantado' : 'Configure o evento em Configurações'}
               </p>
             </div>
 
-            {event && (
-              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 text-sm text-princess-text/70">
-                <div className="flex items-center gap-2 bg-white/70 backdrop-blur px-3 py-2 rounded-xl border border-princess-pink/20">
-                  <Calendar size={14} className="text-princess-rose shrink-0" />
-                  <span className="font-semibold capitalize">{fmtDateLong(event.date)}</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/70 backdrop-blur px-3 py-2 rounded-xl border border-princess-pink/20">
-                  <Clock size={14} className="text-princess-rose shrink-0" />
-                  <span className="font-semibold">às {fmtTime(event.date)}</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/70 backdrop-blur px-3 py-2 rounded-xl border border-princess-pink/20">
-                  <MapPin size={14} className="text-princess-rose shrink-0" />
-                  <span className="font-semibold">{event.locationName}</span>
-                </div>
-                {event.locationAddress && (
-                  <div className="flex items-center gap-2 text-princess-text/50 px-1">
-                    <span className="text-xs">{event.locationAddress}</span>
-                  </div>
+            {info && (
+              <ul className="flex flex-wrap justify-center md:justify-start gap-2 text-sm">
+                <li className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-princess-pink">
+                  <Calendar size={15} className="text-forest-olive shrink-0" />
+                  <span className="font-semibold">{info.dateLabel} · {info.weekday}</span>
+                </li>
+                <li className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-princess-pink">
+                  <Clock size={15} className="text-forest-olive shrink-0" />
+                  <span className="font-semibold">{info.timeLabel ? `Às ${info.timeLabel}` : 'Horário a confirmar'}</span>
+                </li>
+                <li className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-princess-pink">
+                  <MapPin size={15} className="text-forest-olive shrink-0" />
+                  <span className="font-semibold">{info.location ? info.location.name : 'Local revelado após o RSVP'}</span>
+                </li>
+                {info.deadlineLabel && (
+                  <li className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-princess-gold-light border border-princess-gold/25 text-princess-gold-dark">
+                    <CheckCircle2 size={15} className="shrink-0" />
+                    <span className="font-semibold">RSVP até {info.deadlineLabel}</span>
+                  </li>
                 )}
-              </div>
+              </ul>
             )}
           </div>
 
-          {/* Countdown box */}
+          {/* Contagem regressiva */}
           {event && (
-            <div className={`flex-shrink-0 px-8 py-6 rounded-2xl text-center border-2 min-w-[180px] ${
+            <div className={`mx-auto md:mx-0 grid place-items-center text-center w-36 h-36 rounded-full border-4 ${
               isToday
-                ? 'bg-gradient-to-br from-princess-rose to-princess-pink-dark text-white border-princess-rose shadow-lg animate-float'
+                ? 'bg-princess-rose text-white border-princess-rose'
                 : isPast
-                ? 'bg-white/80 text-princess-text/60 border-princess-pink/20'
-                : 'bg-white/80 text-princess-rose border-princess-pink/40 animate-float'
+                ? 'bg-white text-princess-text/70 border-princess-pink'
+                : 'bg-white text-princess-rose border-princess-rose/70'
             }`}>
               {isToday ? (
-                <>
-                  <PartyPopper size={28} className="mx-auto mb-2" />
-                  <p className="text-2xl font-serif-display font-bold">É HOJE!</p>
-                  <p className="text-xs mt-1 opacity-80">✨ Que dia mágico!</p>
-                </>
+                <div>
+                  <PartyPopper size={26} className="mx-auto mb-1" />
+                  <p className="text-2xl font-serif-display">É hoje!</p>
+                </div>
               ) : isPast ? (
-                <>
-                  <CheckCircle2 size={24} className="mx-auto mb-2 text-emerald-500" />
-                  <p className="text-sm font-semibold">Aconteceu há</p>
-                  <p className="text-3xl font-serif-display font-bold text-emerald-600">{Math.abs(daysLeft)}</p>
-                  <p className="text-xs mt-1 text-princess-text/50">dias</p>
-                </>
+                <div>
+                  <p className="text-xs font-semibold">Aconteceu há</p>
+                  <p className="text-4xl font-serif-display text-forest-sage-dark">{Math.abs(daysLeft)}</p>
+                  <p className="text-xs text-princess-text/60">dias</p>
+                </div>
               ) : (
-                <>
-                  <Crown size={24} className="mx-auto mb-2 opacity-70" />
-                  <p className="text-xs font-bold uppercase tracking-widest opacity-70">Faltam</p>
-                  <p className="text-5xl font-serif-display font-bold mt-1">{daysLeft}</p>
-                  <p className="text-sm font-semibold mt-1 opacity-80">{daysLeft === 1 ? 'dia' : 'dias'}</p>
-                </>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-princess-text/60">Faltam</p>
+                  <p className="text-5xl font-serif-display leading-none my-1 tabular-nums">{daysLeft}</p>
+                  <p className="text-sm font-semibold">{daysLeft === 1 ? 'dia' : 'dias'}</p>
+                </div>
               )}
             </div>
           )}
         </div>
-      </div>
+      </section>
 
       {/* ════════════════════════════════════════════════════════════════════
           3 CARDS DE RESUMO
@@ -209,28 +195,28 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-2xl p-6 border border-princess-pink-light/40 princess-card-shadow space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm font-bold text-princess-text/60">Confirmações</p>
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
-              <Users size={18} className="text-emerald-500" />
+            <div className="w-9 h-9 rounded-xl bg-princess-pink-light flex items-center justify-center">
+              <Users size={18} className="text-princess-rose" />
             </div>
           </div>
 
           {/* Total confirmados */}
           <div>
-            <p className="text-4xl font-serif-display font-bold text-emerald-600">{confPessoas}</p>
+            <p className="text-4xl font-serif-display font-bold text-forest-sage-dark">{confPessoas}</p>
             <p className="text-xs text-princess-text/50 mt-0.5">pessoas confirmadas</p>
           </div>
 
           {/* Adultos / crianças */}
           <div className="flex gap-3">
-            <div className="flex-1 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2 text-center">
-              <p className="text-lg font-bold text-emerald-700">{confAdultos}</p>
-              <p className="text-[10px] text-emerald-600 font-medium flex items-center justify-center gap-0.5 mt-0.5">
+            <div className="flex-1 bg-princess-pink-light border border-princess-lilac rounded-xl px-3 py-2 text-center">
+              <p className="text-lg font-bold text-forest-sage-dark">{confAdultos}</p>
+              <p className="text-[10px] text-forest-sage-dark font-medium flex items-center justify-center gap-0.5 mt-0.5">
                 <User size={9} /> Adultos
               </p>
             </div>
-            <div className="flex-1 bg-pink-50 border border-pink-100 rounded-xl px-3 py-2 text-center">
-              <p className="text-lg font-bold text-pink-600">{confCriancas}</p>
-              <p className="text-[10px] text-pink-500 font-medium flex items-center justify-center gap-0.5 mt-0.5">
+            <div className="flex-1 bg-princess-gold-light border border-princess-gold/25 rounded-xl px-3 py-2 text-center">
+              <p className="text-lg font-bold text-princess-gold-dark">{confCriancas}</p>
+              <p className="text-[10px] text-princess-gold font-medium flex items-center justify-center gap-0.5 mt-0.5">
                 <Baby size={9} /> Crianças
               </p>
             </div>
@@ -238,10 +224,10 @@ export default async function DashboardPage() {
 
           {/* Pendentes + recusados */}
           <div className="flex items-center justify-between pt-3 border-t border-princess-pink-light/40 text-xs">
-            <span className="flex items-center gap-1 text-amber-600 font-medium">
+            <span className="flex items-center gap-1 text-princess-gold font-medium">
               <Clock size={11} /> {pending.length} aguardando
             </span>
-            <span className="flex items-center gap-1 text-red-500 font-medium">
+            <span className="flex items-center gap-1 text-forest-berry font-medium">
               <XCircle size={11} /> {declined.length} recusaram
             </span>
           </div>
@@ -256,8 +242,8 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-2xl p-6 border border-princess-pink-light/40 princess-card-shadow space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm font-bold text-princess-text/60">Orçamento & Contas</p>
-            <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center">
-              <Wallet size={18} className="text-amber-500" />
+            <div className="w-9 h-9 rounded-xl bg-princess-gold-light flex items-center justify-center">
+              <Wallet size={18} className="text-princess-gold" />
             </div>
           </div>
 
@@ -269,7 +255,7 @@ export default async function DashboardPage() {
             </div>
             <div className="flex justify-between items-baseline">
               <span className="text-xs text-princess-text/50">Contratado</span>
-              <span className={`font-bold ${isOverBudget ? 'text-red-500' : 'text-princess-rose'}`}>{fmt(totalActual)}</span>
+              <span className={`font-bold ${isOverBudget ? 'text-forest-berry' : 'text-princess-rose'}`}>{fmt(totalActual)}</span>
             </div>
             {totalPlanned > 0 && (
               <p className="text-[11px] text-princess-text/40">{pctActual.toFixed(0)}% do previsto contratado</p>
@@ -279,19 +265,19 @@ export default async function DashboardPage() {
           {/* Barra dupla */}
           <div className="space-y-1">
             <div className="flex justify-between text-[11px] text-princess-text/50">
-              <span className="text-emerald-600 font-semibold">Pago: {fmt(totalPaid)}</span>
-              <span className="text-amber-600 font-semibold">Restante: {fmt(totalRem)}</span>
+              <span className="text-forest-sage-dark font-semibold">Pago: {fmt(totalPaid)}</span>
+              <span className="text-princess-gold font-semibold">Restante: {fmt(totalRem)}</span>
             </div>
             <div className="relative w-full h-3 bg-princess-pink-light/30 rounded-full overflow-hidden border border-princess-pink/10">
               {totalPlanned > 0 && (
                 <div className="absolute inset-y-0 left-0 rounded-full bg-princess-rose/20 transition-all duration-700"
                   style={{ width: `${pctActual}%` }} />
               )}
-              <div className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-700"
+              <div className="absolute inset-y-0 left-0 rounded-full bg-princess-rose transition-all duration-700"
                 style={{ width: `${pctPaid}%` }} />
             </div>
             <div className="flex items-center gap-3 text-[10px] text-princess-text/40">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" /> Pago</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-princess-rose inline-block" /> Pago</span>
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-princess-rose/25 inline-block" /> Contratado</span>
             </div>
           </div>
@@ -306,8 +292,8 @@ export default async function DashboardPage() {
         <div className="bg-white rounded-2xl p-6 border border-princess-pink-light/40 princess-card-shadow space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm font-bold text-princess-text/60">Checklist de Tarefas</p>
-            <div className="w-9 h-9 rounded-xl bg-purple-50 flex items-center justify-center">
-              <CheckSquare size={18} className="text-purple-500" />
+            <div className="w-9 h-9 rounded-xl bg-princess-gold-light flex items-center justify-center">
+              <CheckSquare size={18} className="text-princess-gold" />
             </div>
           </div>
 
@@ -321,15 +307,15 @@ export default async function DashboardPage() {
 
           {/* Barra */}
           <div className="space-y-2">
-            <div className="w-full h-3 bg-purple-50 rounded-full overflow-hidden border border-purple-100">
-              <div className="h-full rounded-full bg-gradient-to-r from-princess-lilac to-purple-400 transition-all duration-700"
+            <div className="w-full h-3 bg-princess-gold-light rounded-full overflow-hidden border border-princess-gold/25">
+              <div className="h-full rounded-full bg-princess-gold transition-all duration-700"
                 style={{ width: `${taskPct}%` }} />
             </div>
             <div className="flex gap-2">
-              <span className="flex-1 text-center text-xs bg-purple-50 border border-purple-100 rounded-xl py-1.5 font-semibold text-purple-600">
+              <span className="flex-1 text-center text-xs bg-princess-gold-light border border-princess-gold/25 rounded-xl py-1.5 font-semibold text-princess-gold">
                 {doneTasks} feitas
               </span>
-              <span className="flex-1 text-center text-xs bg-amber-50 border border-amber-100 rounded-xl py-1.5 font-semibold text-amber-600">
+              <span className="flex-1 text-center text-xs bg-princess-gold-light border border-princess-gold/25 rounded-xl py-1.5 font-semibold text-princess-gold">
                 {totalTasks - doneTasks} pendentes
               </span>
             </div>
@@ -337,7 +323,7 @@ export default async function DashboardPage() {
 
           {/* Urgentes */}
           {urgentTasks.length > 0 && (
-            <div className="flex items-center gap-1.5 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+            <div className="flex items-center gap-1.5 text-xs text-forest-berry bg-[#f9ebe8] border border-[#f1d5cf] rounded-xl px-3 py-2">
               <AlertTriangle size={12} />
               <span><strong>{urgentTasks.length}</strong> tarefa{urgentTasks.length > 1 ? 's' : ''} urgente{urgentTasks.length > 1 ? 's' : ''} pendente{urgentTasks.length > 1 ? 's' : ''}</span>
             </div>
@@ -359,7 +345,7 @@ export default async function DashboardPage() {
         <div className="lg:col-span-1 bg-white rounded-2xl border border-princess-pink-light/40 princess-card-shadow overflow-hidden">
           <div className="px-5 py-4 border-b border-princess-pink-light/30 flex items-center justify-between">
             <h3 className="font-serif-display font-bold text-base text-princess-text flex items-center gap-2">
-              <AlertTriangle size={16} className="text-red-500" /> Tarefas Urgentes
+              <AlertTriangle size={16} className="text-forest-berry" /> Tarefas Urgentes
             </h3>
             <Link href="/admin/tarefas" className="text-[11px] text-princess-rose font-bold hover:underline flex items-center gap-0.5">
               Ver todas <ArrowRight size={11} />
@@ -368,13 +354,13 @@ export default async function DashboardPage() {
 
           <div className="divide-y divide-princess-pink-light/20">
             {urgentTasks.length > 0 ? urgentTasks.map(task => (
-              <div key={task.id} className="px-5 py-3.5 hover:bg-[#FAF9F6]/60 transition">
+              <div key={task.id} className="px-5 py-3.5 hover:bg-princess-lavender/60 transition">
                 <div className="flex items-start gap-2">
-                  <span className="mt-0.5 w-2 h-2 rounded-full bg-red-400 shrink-0 mt-1.5" />
+                  <span className="mt-0.5 w-2 h-2 rounded-full bg-forest-berry shrink-0 mt-1.5" />
                   <div>
                     <p className="text-sm font-medium text-princess-text leading-snug">{task.title}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] font-bold text-red-500 bg-red-50 border border-red-100 px-1.5 py-0.5 rounded uppercase tracking-wide">
+                      <span className="text-[10px] font-bold text-forest-berry bg-[#f9ebe8] border border-[#f1d5cf] px-1.5 py-0.5 rounded uppercase tracking-wide">
                         Alta
                       </span>
                       <span className="text-[10px] text-princess-text/45">{task.category}</span>
@@ -389,7 +375,7 @@ export default async function DashboardPage() {
               </div>
             )) : (
               <div className="px-5 py-10 text-center">
-                <CheckCircle2 size={28} className="mx-auto text-emerald-400 mb-2" />
+                <CheckCircle2 size={28} className="mx-auto text-princess-rose mb-2" />
                 <p className="text-sm text-princess-text/50 font-medium">Nenhuma tarefa urgente!</p>
                 <p className="text-xs text-princess-text/35 mt-0.5">Bom trabalho ✨</p>
               </div>
@@ -401,7 +387,7 @@ export default async function DashboardPage() {
         <div className="lg:col-span-1 bg-white rounded-2xl border border-princess-pink-light/40 princess-card-shadow overflow-hidden">
           <div className="px-5 py-4 border-b border-princess-pink-light/30 flex items-center justify-between">
             <h3 className="font-serif-display font-bold text-base text-princess-text flex items-center gap-2">
-              <Sparkles size={16} className="text-princess-gold" /> Últimos RSVPs
+              <Leaf size={16} className="text-princess-gold" /> Últimos RSVPs
             </h3>
             <Link href="/admin/convidados" className="text-[11px] text-princess-rose font-bold hover:underline flex items-center gap-0.5">
               Ver todos <ArrowRight size={11} />
@@ -410,7 +396,7 @@ export default async function DashboardPage() {
 
           <div className="divide-y divide-princess-pink-light/20">
             {recentRsvps.length > 0 ? recentRsvps.map(g => (
-              <div key={g.id} className="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-[#FAF9F6]/60 transition">
+              <div key={g.id} className="px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-princess-lavender/60 transition">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-princess-text truncate">{g.name}</p>
                   <p className="text-[10px] text-princess-text/40 mt-0.5 flex items-center gap-1">
@@ -422,7 +408,7 @@ export default async function DashboardPage() {
                 <div className="shrink-0 text-right">
                   {g.status === 'confirmado' && (
                     <>
-                      <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg">
+                      <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-forest-sage-dark bg-princess-pink-light border border-princess-lilac px-2 py-0.5 rounded-lg">
                         <CheckCircle2 size={10} /> Confirmou
                       </span>
                       <p className="text-[10px] text-princess-text/45 mt-0.5">
@@ -431,12 +417,12 @@ export default async function DashboardPage() {
                     </>
                   )}
                   {g.status === 'nao_vai' && (
-                    <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-lg">
+                    <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-forest-berry bg-[#f9ebe8] border border-[#ebc6be] px-2 py-0.5 rounded-lg">
                       <XCircle size={10} /> Não vai
                     </span>
                   )}
                   {g.status === 'pendente' && (
-                    <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg">
+                    <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-princess-gold-dark bg-princess-gold-light border border-princess-gold/25 px-2 py-0.5 rounded-lg">
                       <Clock size={10} /> Pendente
                     </span>
                   )}
@@ -444,7 +430,7 @@ export default async function DashboardPage() {
               </div>
             )) : (
               <div className="px-5 py-10 text-center">
-                <Crown size={28} className="mx-auto text-princess-rose/25 mb-2" />
+                <TreePine size={28} className="mx-auto text-princess-rose/25 mb-2" />
                 <p className="text-sm text-princess-text/50 font-medium">Nenhum RSVP ainda.</p>
                 <p className="text-xs text-princess-text/35 mt-0.5">Envie o link do convite!</p>
               </div>
@@ -466,9 +452,9 @@ export default async function DashboardPage() {
           {/* Resumo rápido */}
           <div className="px-5 py-3 border-b border-princess-pink-light/15 grid grid-cols-3 gap-2 text-center">
             {[
-              { label: 'A Cotar',    count: vendors.filter(v => v.status === 'a_cotar').length,    cls: 'text-amber-600 bg-amber-50 border-amber-100' },
-              { label: 'Contratado', count: vendors.filter(v => v.status === 'contratado').length, cls: 'text-blue-600 bg-blue-50 border-blue-100' },
-              { label: 'Pago',       count: vendors.filter(v => v.status === 'pago').length,       cls: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
+              { label: 'A Cotar',    count: vendors.filter(v => v.status === 'a_cotar').length,    cls: 'text-princess-gold bg-princess-gold-light border-princess-gold/25' },
+              { label: 'Contratado', count: vendors.filter(v => v.status === 'contratado').length, cls: 'text-forest-sage-dark bg-princess-pink-light border-princess-lilac' },
+              { label: 'Pago',       count: vendors.filter(v => v.status === 'pago').length,       cls: 'text-forest-sage-dark bg-princess-pink-light border-princess-lilac' },
             ].map(s => (
               <div key={s.label} className={`rounded-xl border px-2 py-2 ${s.cls}`}>
                 <p className="text-lg font-bold">{s.count}</p>
@@ -479,13 +465,13 @@ export default async function DashboardPage() {
 
           <div className="divide-y divide-princess-pink-light/20">
             {vendorsPendentes.length > 0 ? vendorsPendentes.map(v => (
-              <div key={v.id} className="px-5 py-3 flex items-center justify-between hover:bg-[#FAF9F6]/60 transition">
+              <div key={v.id} className="px-5 py-3 flex items-center justify-between hover:bg-princess-lavender/60 transition">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-princess-text truncate">{v.name}</p>
                   <p className="text-[11px] text-princess-text/45 mt-0.5">{v.service}</p>
                 </div>
                 <div className="shrink-0 ml-2 text-right">
-                  <span className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg">
+                  <span className="text-xs font-bold text-princess-gold-dark bg-princess-gold-light border border-princess-gold/25 px-2 py-0.5 rounded-lg">
                     A Cotar
                   </span>
                   {v.agreedValue > 0 && (
@@ -495,7 +481,7 @@ export default async function DashboardPage() {
               </div>
             )) : (
               <div className="px-5 py-8 text-center">
-                <TrendingUp size={24} className="mx-auto text-emerald-400 mb-2" />
+                <TrendingUp size={24} className="mx-auto text-princess-rose mb-2" />
                 <p className="text-sm text-princess-text/50 font-medium">Tudo contratado!</p>
                 <p className="text-xs text-princess-text/35 mt-0.5">Nenhum fornecedor a cotar.</p>
               </div>

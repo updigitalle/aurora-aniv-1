@@ -8,7 +8,7 @@ import {
 } from './actions';
 import {
   Building2, Plus, Search, Trash2, Edit2, X, Smartphone, Mail,
-  Sparkles, CheckCircle, AlertCircle, Coins, CreditCard, Banknote,
+  Leaf, CheckCircle, AlertCircle, Coins,
   CalendarPlus, CalendarCheck, ChevronDown, ChevronUp, Receipt,
   Wallet, Clock, BadgeCheck,
 } from 'lucide-react';
@@ -41,9 +41,9 @@ const PAYMENT_METHODS_CONFIRM = [
 ];
 
 const statusConfig: Record<string, { label: string; cls: string }> = {
-  a_cotar:   { label: 'A Cotar',    cls: 'text-amber-700 bg-amber-50 border-amber-200' },
-  contratado:{ label: 'Contratado', cls: 'text-blue-700 bg-blue-50 border-blue-200' },
-  pago:      { label: 'Pago',       cls: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
+  a_cotar:   { label: 'A Cotar',    cls: 'text-princess-gold-dark bg-princess-gold-light border-princess-gold/25' },
+  contratado:{ label: 'Contratado', cls: 'text-forest-sage-dark bg-princess-pink-light border-princess-lilac' },
+  pago:      { label: 'Pago',       cls: 'text-forest-sage-dark bg-princess-pink-light border-princess-lilac' },
 };
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
@@ -203,7 +203,8 @@ export default function VendorListClient({ initialVendors }: Props) {
   const toggleExpand = (id: string) =>
     setExpanded(prev => {
       const s = new Set(prev);
-      s.has(id) ? s.delete(id) : s.add(id);
+      if (s.has(id)) s.delete(id);
+      else s.add(id);
       return s;
     });
 
@@ -222,7 +223,7 @@ export default function VendorListClient({ initialVendors }: Props) {
         </div>
         <button
           onClick={openAdd}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-princess-rose to-princess-pink-dark hover:opacity-90 text-white rounded-xl font-medium shadow-md transition text-sm"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-princess-rose hover:bg-princess-pink-dark text-white rounded-xl font-medium shadow-md transition text-sm"
         >
           <Plus size={16} /> Adicionar Fornecedor
         </button>
@@ -235,7 +236,7 @@ export default function VendorListClient({ initialVendors }: Props) {
           <input
             value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por nome ou serviço..."
-            className="w-full pl-9 pr-4 py-2 bg-[#FAF9F6] border border-princess-rose/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30"
+            className="w-full pl-9 pr-4 py-2 bg-princess-lavender border border-princess-rose/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30"
           />
         </div>
       </div>
@@ -294,17 +295,17 @@ export default function VendorListClient({ initialVendors }: Props) {
                     {vendor.payments.length > 0 && (
                       <>
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-emerald-600 font-medium flex items-center gap-1"><BadgeCheck size={12} /> Pago</span>
-                          <span className="font-bold text-emerald-600">{fmt(totalPaid)}</span>
+                          <span className="text-forest-sage-dark font-medium flex items-center gap-1"><BadgeCheck size={12} /> Pago</span>
+                          <span className="font-bold text-forest-sage-dark">{fmt(totalPaid)}</span>
                         </div>
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-princess-text/50 flex items-center gap-1"><Clock size={12} /> Restante</span>
-                          <span className={`font-bold ${remaining > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>{fmt(remaining)}</span>
+                          <span className={`font-bold ${remaining > 0 ? 'text-princess-gold' : 'text-forest-sage-dark'}`}>{fmt(remaining)}</span>
                         </div>
                         {/* Barra de progresso */}
-                        <div className="w-full bg-gray-100 rounded-full h-1.5 mt-1">
+                        <div className="w-full bg-princess-pink rounded-full h-1.5 mt-1">
                           <div
-                            className="bg-gradient-to-r from-princess-rose to-emerald-400 h-1.5 rounded-full transition-all duration-500"
+                            className="bg-princess-rose h-1.5 rounded-full transition-all duration-500"
                             style={{ width: `${pct}%` }}
                           />
                         </div>
@@ -314,22 +315,22 @@ export default function VendorListClient({ initialVendors }: Props) {
 
                   {/* Datas de pagamento (pix parcelado) */}
                   {vendor.paymentMethod === 'pix_parcelado' && payDates.length > 0 && (
-                    <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 space-y-1.5">
-                      <p className="text-[11px] font-bold text-amber-700 flex items-center gap-1 uppercase tracking-wide">
+                    <div className="bg-princess-gold-light border border-princess-gold/25 rounded-xl p-3 space-y-1.5">
+                      <p className="text-[11px] font-bold text-princess-gold-dark flex items-center gap-1 uppercase tracking-wide">
                         <CalendarCheck size={11} /> Parcelas Pix
                       </p>
                       {payDates.map((d: string) => (
                         <div key={d} className="flex items-center justify-between">
-                          <span className="text-xs text-amber-800">{fmtDate(d)}</span>
+                          <span className="text-xs text-princess-gold-dark">{fmtDate(d)}</span>
                           {/* Marcar se já tem pagamento próximo desta data */}
                           {vendor.payments.some(p => {
                             const pd = new Date(p.paymentDate);
                             const dd = new Date(d);
                             return Math.abs(pd.getTime() - dd.getTime()) < 2 * 86400000;
                           }) ? (
-                            <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-0.5"><CheckCircle size={10} /> Pago</span>
+                            <span className="text-[10px] text-forest-sage-dark font-bold flex items-center gap-0.5"><CheckCircle size={10} /> Pago</span>
                           ) : (
-                            <span className="text-[10px] text-amber-600">Pendente</span>
+                            <span className="text-[10px] text-princess-gold">Pendente</span>
                           )}
                         </div>
                       ))}
@@ -362,7 +363,7 @@ export default function VendorListClient({ initialVendors }: Props) {
 
                   {/* Observações */}
                   {vendor.notes && (
-                    <p className="text-xs text-princess-text/55 italic bg-[#FAF9F6] p-2.5 rounded-xl border border-princess-rose/5">
+                    <p className="text-xs text-princess-text/55 italic bg-princess-lavender p-2.5 rounded-xl border border-princess-rose/5">
                       {vendor.notes}
                     </p>
                   )}
@@ -381,16 +382,16 @@ export default function VendorListClient({ initialVendors }: Props) {
                       {isExpanded && (
                         <div className="mt-2 space-y-1.5">
                           {vendor.payments.map(p => (
-                            <div key={p.id} className="flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2 text-xs">
+                            <div key={p.id} className="flex items-center justify-between bg-princess-pink-light border border-princess-lilac rounded-xl px-3 py-2 text-xs">
                               <div>
-                                <span className="font-bold text-emerald-700">{fmt(p.amount)}</span>
-                                <span className="text-emerald-600 ml-1.5">· {fmtDate(p.paymentDate)}</span>
-                                <span className="text-emerald-500 ml-1.5">· {p.paymentMethod}</span>
-                                {p.notes && <span className="text-emerald-500 ml-1.5 italic">· {p.notes}</span>}
+                                <span className="font-bold text-forest-sage-dark">{fmt(p.amount)}</span>
+                                <span className="text-forest-sage-dark ml-1.5">· {fmtDate(p.paymentDate)}</span>
+                                <span className="text-princess-rose ml-1.5">· {p.paymentMethod}</span>
+                                {p.notes && <span className="text-princess-rose ml-1.5 italic">· {p.notes}</span>}
                               </div>
                               <button
                                 onClick={() => handleDeletePayment(p.id)}
-                                className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition ml-2"
+                                className="p-1 text-forest-berry hover:text-forest-berry hover:bg-[#f9ebe8] rounded-lg transition ml-2"
                                 title="Remover pagamento"
                               >
                                 <Trash2 size={11} />
@@ -404,18 +405,18 @@ export default function VendorListClient({ initialVendors }: Props) {
                 </div>
 
                 {/* ── Footer ── */}
-                <div className="px-5 py-3 border-t border-princess-pink-light/30 bg-[#FDFBFC] flex items-center justify-between gap-2">
+                <div className="px-5 py-3 border-t border-princess-pink-light/30 bg-[#fbfaf6] flex items-center justify-between gap-2">
                   {/* Confirmar Pagamento */}
                   {vendor.status !== 'pago' ? (
                     <button
                       onClick={() => openPayModal(vendor)}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:opacity-90 px-3 py-1.5 rounded-lg shadow-sm transition"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-princess-rose hover:bg-princess-pink-dark px-3 py-1.5 rounded-lg shadow-sm transition"
                     >
                       <Wallet size={12} /> Confirmar Pagamento
                     </button>
                   ) : (
                     hasExpense ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-100">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-forest-sage-dark bg-princess-pink-light px-2.5 py-1.5 rounded-lg border border-princess-lilac">
                         <CheckCircle size={12} /> Quitado
                       </span>
                     ) : (
@@ -434,7 +435,7 @@ export default function VendorListClient({ initialVendors }: Props) {
                     <button onClick={() => openEdit(vendor)} className="p-1.5 text-princess-text/50 hover:text-princess-rose hover:bg-princess-pink-light/30 rounded-lg transition" title="Editar">
                       <Edit2 size={14} />
                     </button>
-                    <button onClick={() => handleDelete(vendor.id)} className="p-1.5 text-princess-text/50 hover:text-red-500 hover:bg-red-50 rounded-lg transition" title="Excluir">
+                    <button onClick={() => handleDelete(vendor.id)} className="p-1.5 text-princess-text/50 hover:text-forest-berry hover:bg-[#f9ebe8] rounded-lg transition" title="Excluir">
                       <Trash2 size={14} />
                     </button>
                   </div>
@@ -467,7 +468,7 @@ export default function VendorListClient({ initialVendors }: Props) {
             </button>
 
             <h3 className="font-serif-display font-bold text-lg text-princess-text mb-5 flex items-center gap-1.5">
-              <Sparkles size={16} className="text-princess-gold" />
+              <Leaf size={16} className="text-princess-gold" />
               {editing ? 'Editar Fornecedor' : 'Novo Fornecedor'}
             </h3>
 
@@ -478,7 +479,7 @@ export default function VendorListClient({ initialVendors }: Props) {
                 <label className="block text-xs font-semibold text-princess-text/75 mb-1">Nome / Empresa *</label>
                 <input value={fName} onChange={e => setFName(e.target.value)} required
                   placeholder="Ex: Estúdio Encantado Fotografia"
-                  className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                  className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
               </div>
 
               {/* Serviço */}
@@ -486,7 +487,7 @@ export default function VendorListClient({ initialVendors }: Props) {
                 <label className="block text-xs font-semibold text-princess-text/75 mb-1">Serviço Prestado *</label>
                 <input value={fService} onChange={e => setFService(e.target.value)} required
                   placeholder="Ex: Fotografia, Buffet, Bolo, Decoração..."
-                  className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                  className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
               </div>
 
               {/* Contatos */}
@@ -494,12 +495,12 @@ export default function VendorListClient({ initialVendors }: Props) {
                 <div>
                   <label className="block text-xs font-semibold text-princess-text/75 mb-1">WhatsApp</label>
                   <input value={fPhone} onChange={e => setFPhone(e.target.value)} placeholder="11999998888"
-                    className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                    className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-princess-text/75 mb-1">E-mail</label>
                   <input type="email" value={fEmail} onChange={e => setFEmail(e.target.value)} placeholder="contato@empresa.com"
-                    className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                    className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
                 </div>
               </div>
 
@@ -508,7 +509,7 @@ export default function VendorListClient({ initialVendors }: Props) {
                 <div>
                   <label className="block text-xs font-semibold text-princess-text/75 mb-1">Status do Contrato</label>
                   <select value={fStatus} onChange={e => setFStatus(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30">
+                    className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30">
                     <option value="a_cotar">A Cotar</option>
                     <option value="contratado">Contratado</option>
                     <option value="pago">Pago</option>
@@ -517,7 +518,7 @@ export default function VendorListClient({ initialVendors }: Props) {
                 <div>
                   <label className="block text-xs font-semibold text-princess-text/75 mb-1">Valor Acordado (R$) *</label>
                   <input type="number" step="0.01" min="0" value={fAgreed} onChange={e => setFAgreed(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                    className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
                 </div>
               </div>
 
@@ -528,7 +529,7 @@ export default function VendorListClient({ initialVendors }: Props) {
                 </label>
                 <input type="number" step="0.01" min="0" value={fDeposit} onChange={e => setFDeposit(e.target.value)}
                   placeholder="0,00"
-                  className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                  className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
               </div>
 
               {/* Forma de pagamento */}
@@ -541,7 +542,7 @@ export default function VendorListClient({ initialVendors }: Props) {
                       className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition ${
                         fPayMethod === m.value
                           ? 'bg-princess-rose text-white border-princess-rose shadow-sm'
-                          : 'bg-[#FAF9F6] text-princess-text/70 border-princess-rose/15 hover:border-princess-rose/40'
+                          : 'bg-princess-lavender text-princess-text/70 border-princess-rose/15 hover:border-princess-rose/40'
                       }`}>
                       <span>{m.icon}</span> {m.label}
                     </button>
@@ -551,8 +552,8 @@ export default function VendorListClient({ initialVendors }: Props) {
 
               {/* Datas do Pix Parcelado */}
               {fPayMethod === 'pix_parcelado' && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
-                  <p className="text-xs font-bold text-amber-700 flex items-center gap-1.5 uppercase tracking-wide">
+                <div className="bg-princess-gold-light border border-princess-gold/25 rounded-xl p-4 space-y-3">
+                  <p className="text-xs font-bold text-princess-gold-dark flex items-center gap-1.5 uppercase tracking-wide">
                     <CalendarPlus size={13} /> Datas dos Pagamentos Pix
                   </p>
 
@@ -560,9 +561,9 @@ export default function VendorListClient({ initialVendors }: Props) {
                   {fPayDates.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {fPayDates.map(d => (
-                        <span key={d} className="inline-flex items-center gap-1 text-xs bg-white border border-amber-300 text-amber-800 rounded-lg px-2.5 py-1 font-medium">
+                        <span key={d} className="inline-flex items-center gap-1 text-xs bg-white border border-princess-gold/40 text-princess-gold-dark rounded-lg px-2.5 py-1 font-medium">
                           {fmtDate(d)}
-                          <button type="button" onClick={() => removePayDate(d)} className="ml-1 text-amber-500 hover:text-red-500">
+                          <button type="button" onClick={() => removePayDate(d)} className="ml-1 text-princess-gold hover:text-forest-berry">
                             <X size={11} />
                           </button>
                         </span>
@@ -573,14 +574,14 @@ export default function VendorListClient({ initialVendors }: Props) {
                   {/* Input nova data */}
                   <div className="flex gap-2">
                     <input type="date" value={fNewDate} onChange={e => setFNewDate(e.target.value)}
-                      className="flex-1 px-3 py-2 bg-white border border-amber-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/40" />
+                      className="flex-1 px-3 py-2 bg-white border border-princess-gold/40 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-gold/40" />
                     <button type="button" onClick={addPayDate}
-                      className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-medium transition flex items-center gap-1">
+                      className="px-3 py-2 bg-princess-gold hover:bg-princess-gold text-white rounded-xl text-sm font-medium transition flex items-center gap-1">
                       <Plus size={14} /> Adicionar
                     </button>
                   </div>
                   {fPayDates.length === 0 && (
-                    <p className="text-[11px] text-amber-600">Adicione pelo menos uma data de pagamento.</p>
+                    <p className="text-[11px] text-princess-gold">Adicione pelo menos uma data de pagamento.</p>
                   )}
                 </div>
               )}
@@ -590,23 +591,23 @@ export default function VendorListClient({ initialVendors }: Props) {
                 <label className="block text-xs font-semibold text-princess-text/75 mb-1">Observações</label>
                 <textarea value={fNotes} onChange={e => setFNotes(e.target.value)} rows={3}
                   placeholder="Ex: Incluso álbum impresso com 50 páginas..."
-                  className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30 resize-none" />
+                  className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30 resize-none" />
               </div>
 
               {fError && (
-                <p className="text-xs text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 flex items-center gap-1.5">
+                <p className="text-xs text-forest-berry bg-[#f9ebe8] p-3 rounded-xl border border-[#f1d5cf] flex items-center gap-1.5">
                   <AlertCircle size={13} /> {fError}
                 </p>
               )}
 
               <div className="flex justify-end gap-3 pt-1">
                 <button type="button" onClick={() => setVendorModal(false)}
-                  className="px-4 py-2 text-sm text-princess-text/60 hover:bg-gray-50 rounded-xl transition">
+                  className="px-4 py-2 text-sm text-princess-text/60 hover:bg-princess-lavender rounded-xl transition">
                   Cancelar
                 </button>
                 <button type="submit" disabled={isPending}
-                  className="px-5 py-2 text-sm bg-gradient-to-r from-princess-rose to-princess-pink-dark hover:opacity-90 text-white rounded-xl font-medium shadow-sm transition disabled:opacity-50 flex items-center gap-1.5">
-                  {isPending ? 'Salvando...' : 'Salvar Fornecedor'} <Sparkles size={13} />
+                  className="px-5 py-2 text-sm bg-princess-rose hover:bg-princess-pink-dark text-white rounded-xl font-medium shadow-sm transition disabled:opacity-50 flex items-center gap-1.5">
+                  {isPending ? 'Salvando...' : 'Salvar Fornecedor'} <Leaf size={13} />
                 </button>
               </div>
             </form>
@@ -633,7 +634,7 @@ export default function VendorListClient({ initialVendors }: Props) {
               </button>
 
               <h3 className="font-serif-display font-bold text-lg text-princess-text mb-1 flex items-center gap-1.5">
-                <Wallet size={17} className="text-emerald-500" /> Confirmar Pagamento
+                <Wallet size={17} className="text-princess-rose" /> Confirmar Pagamento
               </h3>
               <p className="text-sm text-princess-text/55 mb-5">{payVendor.name} · {payVendor.service}</p>
 
@@ -645,13 +646,13 @@ export default function VendorListClient({ initialVendors }: Props) {
                 </div>
                 {totalPaid > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-emerald-600">Já pago</span>
-                    <span className="font-bold text-emerald-600">{fmt(totalPaid)}</span>
+                    <span className="text-forest-sage-dark">Já pago</span>
+                    <span className="font-bold text-forest-sage-dark">{fmt(totalPaid)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm border-t border-princess-rose/10 pt-2 mt-1">
                   <span className="text-princess-text/70 font-medium">Saldo restante</span>
-                  <span className="font-bold text-amber-600">{fmt(remaining)}</span>
+                  <span className="font-bold text-princess-gold">{fmt(remaining)}</span>
                 </div>
               </div>
 
@@ -666,7 +667,7 @@ export default function VendorListClient({ initialVendors }: Props) {
                         className={`py-2 px-2 rounded-xl border text-xs font-medium transition ${
                           pMethod === m.value
                             ? 'bg-princess-rose text-white border-princess-rose'
-                            : 'bg-[#FAF9F6] text-princess-text/70 border-princess-rose/15 hover:border-princess-rose/40'
+                            : 'bg-princess-lavender text-princess-text/70 border-princess-rose/15 hover:border-princess-rose/40'
                         }`}>
                         {m.label}
                       </button>
@@ -679,12 +680,12 @@ export default function VendorListClient({ initialVendors }: Props) {
                   <label className="block text-xs font-semibold text-princess-text/75 mb-1">Valor Pago (R$) *</label>
                   <input type="number" step="0.01" min="0.01" value={pAmount}
                     onChange={e => setPAmount(e.target.value)} required
-                    className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30 font-mono text-lg" />
+                    className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30 font-mono text-lg" />
                 </div>
 
                 {/* Valor restante automático */}
                 <div className={`flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-semibold ${
-                  afterPay <= 0 ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-amber-50 border-amber-200 text-amber-700'
+                  afterPay <= 0 ? 'bg-princess-pink-light border-princess-lilac text-forest-sage-dark' : 'bg-princess-gold-light border-princess-gold/25 text-princess-gold-dark'
                 }`}>
                   <span className="flex items-center gap-1.5">
                     {afterPay <= 0 ? <CheckCircle size={14} /> : <Clock size={14} />}
@@ -697,7 +698,7 @@ export default function VendorListClient({ initialVendors }: Props) {
                 <div>
                   <label className="block text-xs font-semibold text-princess-text/75 mb-1">Data do Pagamento *</label>
                   <input type="date" value={pDate} onChange={e => setPDate(e.target.value)} required
-                    className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                    className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
                 </div>
 
                 {/* Observação opcional */}
@@ -707,22 +708,22 @@ export default function VendorListClient({ initialVendors }: Props) {
                   </label>
                   <input value={pNotes} onChange={e => setPNotes(e.target.value)}
                     placeholder="Ex: entrada, 1ª parcela..."
-                    className="w-full px-3 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
+                    className="w-full px-3 py-2.5 bg-princess-lavender border border-princess-rose/20 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-princess-rose/30" />
                 </div>
 
                 {pError && (
-                  <p className="text-xs text-red-500 bg-red-50 p-3 rounded-xl border border-red-100 flex items-center gap-1.5">
+                  <p className="text-xs text-forest-berry bg-[#f9ebe8] p-3 rounded-xl border border-[#f1d5cf] flex items-center gap-1.5">
                     <AlertCircle size={13} /> {pError}
                   </p>
                 )}
 
                 <div className="flex justify-end gap-3 pt-1">
                   <button type="button" onClick={() => setPayModal(false)}
-                    className="px-4 py-2 text-sm text-princess-text/60 hover:bg-gray-50 rounded-xl transition">
+                    className="px-4 py-2 text-sm text-princess-text/60 hover:bg-princess-lavender rounded-xl transition">
                     Cancelar
                   </button>
                   <button type="submit" disabled={isPending}
-                    className="px-5 py-2 text-sm bg-gradient-to-r from-emerald-500 to-emerald-600 hover:opacity-90 text-white rounded-xl font-medium shadow-sm transition disabled:opacity-50 flex items-center gap-1.5">
+                    className="px-5 py-2 text-sm bg-princess-rose hover:bg-princess-pink-dark text-white rounded-xl font-medium shadow-sm transition disabled:opacity-50 flex items-center gap-1.5">
                     {isPending ? 'Salvando...' : 'Confirmar Pagamento'} <BadgeCheck size={14} />
                   </button>
                 </div>

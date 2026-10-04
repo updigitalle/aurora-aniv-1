@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
-  ChevronLeft, CheckCircle2, Users, Search, AlertCircle, Sparkles,
-  Heart, User, Baby, X, Loader2,
+  ChevronLeft, ChevronRight, Check, Heart, Search, AlertCircle, X, Loader2, User, Baby,
 } from 'lucide-react';
 
 type Member = { name: string; type: 'adulto' | 'crianca' | 'bebe'; confirmed: boolean };
@@ -13,13 +13,14 @@ type GuestResult = { id: string; name: string; status: string; members: Member[]
 interface RsvpFormClientProps {
   slug: string;
   babyName: string;
+  deadline: string | null;
 }
 
 const TYPE_LABEL: Record<Member['type'], string> = {
-  adulto: 'Adulto', crianca: 'Criança', bebe: 'Bebê',
+  adulto: 'Adulto', crianca: 'Criança', bebe: 'Bebê de colo',
 };
 
-export default function RsvpFormClient({ slug, babyName }: RsvpFormClientProps) {
+export default function RsvpFormClient({ slug, babyName, deadline }: RsvpFormClientProps) {
   const [query, setQuery]       = useState('');
   const [results, setResults]   = useState<GuestResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -38,27 +39,52 @@ export default function RsvpFormClient({ slug, babyName }: RsvpFormClientProps) 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ─── Busca com debounce ──────────────────────────────────────────────────
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    const q = query.trim();
-    if (q.length < 2) { setResults([]); setSearched(false); return; }
+  // O estado visível da busca muda no próprio onChange; o efeito só agenda a requisição.
+  const handleQueryChange = (value: string) => {
+    setQuery(value);
+    if (value.trim().length < 2) {
+      setResults([]);
+      setSearched(false);
+      setSearching(false);
+    } else {
+      setSearching(true);
+    }
+  };
 
-    setSearching(true);
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) return;
+
+    // Ignora respostas de buscas antigas que cheguem depois da mais recente
+    let cancelled = false;
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(`/api/rsvp?slug=${encodeURIComponent(slug)}&q=${encodeURIComponent(q)}`);
         const data = await res.json();
-        setResults(data.results || []);
+        if (!cancelled) setResults(data.results || []);
       } catch {
-        setResults([]);
+        if (!cancelled) setResults([]);
       } finally {
-        setSearching(false);
-        setSearched(true);
+        if (!cancelled) {
+          setSearching(false);
+          setSearched(true);
+        }
       }
     }, 350);
 
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+    return () => {
+      cancelled = true;
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, [query, slug]);
+
+  // Esc fecha o popup (exceto durante o envio)
+  useEffect(() => {
+    if (!selected) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !loading) setSelected(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selected, loading]);
 
   // ─── Abrir popup da família ──────────────────────────────────────────────
   const openFamily = (g: GuestResult) => {
@@ -99,204 +125,191 @@ export default function RsvpFormClient({ slug, babyName }: RsvpFormClientProps) 
     }
   };
 
-  const confirmingMembers = selected?.members ?? [];
+  const members = selected?.members ?? [];
   const anyChecked = Object.values(checks).some(Boolean);
+  const showResults = query.trim().length >= 2;
 
-  // ─── Tela de sucesso ─────────────────────────────────────────────────────
+  const backLink = (
+    <Link href={`/convite/${slug}`} className="rsvp-back convite-in" style={{ '--d': '150ms' } as React.CSSProperties}>
+      <ChevronLeft size={16} aria-hidden /> Voltar para o convite
+    </Link>
+  );
+
+  // ─── Tela final ──────────────────────────────────────────────────────────
   if (done) {
     const confirmado = done === 'confirmado';
     return (
-      <div className="w-full max-w-xs bg-white/96 border-2 border-princess-rose/20 z-10"
-        style={{ borderRadius: '28px', boxShadow: '0 20px 60px -10px rgba(138,107,79,0.20)' }}>
-        <div className="p-8 text-center space-y-5">
-          <div className="flex justify-center">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center animate-float border-2 ${
-              confirmado ? 'bg-emerald-50 border-emerald-200' : 'bg-princess-pink-light border-princess-rose/20'
-            }`}>
-              {confirmado ? <CheckCircle2 size={32} className="text-emerald-500" /> : <Heart size={32} className="text-princess-rose" />}
-            </div>
-          </div>
-          <div className="space-y-1">
-            <h2 className="font-script text-4xl text-princess-rose">
-              {confirmado ? 'Confirmado!' : 'Resposta Enviada!'}
-            </h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-px flex-1 bg-princess-rose/15" />
-            <Sparkles size={12} className="text-princess-gold/50" />
-            <div className="h-px flex-1 bg-princess-rose/15" />
-          </div>
-          <p className="font-serif-display italic text-sm text-princess-text/70 leading-relaxed">
+      <>
+        {backLink}
+        <section className="rsvp-main rsvp-done" aria-live="polite">
+          <span className="rsvp-done-ring convite-in" style={{ '--d': '100ms' } as React.CSSProperties}>
+            {confirmado ? <Check strokeWidth={2.4} aria-hidden /> : <Heart strokeWidth={2} aria-hidden />}
+          </span>
+          <h1 className="convite-text rsvp-title convite-in" style={{ '--d': '250ms' } as React.CSSProperties}>
+            {confirmado ? 'Presença confirmada!' : 'Resposta enviada'}
+          </h1>
+          <p className="convite-text rsvp-lead convite-in" style={{ '--d': '400ms' } as React.CSSProperties}>
             {confirmado
-              ? <>Que alegria! O bosque encantado espera por você para celebrar o 1º aninho da <strong>{babyName}</strong>! 🦊🍄</>
-              : <>Agradecemos sua resposta. O bosque da <strong>{babyName}</strong> seguirá florescendo com seu carinho! 💖</>}
+              ? `Que alegria! O bosque encantado espera por você para celebrar o 1º aniversário da ${babyName}.`
+              : `Obrigado por avisar. Vamos sentir sua falta no bosque encantado da ${babyName}.`}
           </p>
-          <Link href={`/convite/${slug}`}
-            className="inline-flex items-center gap-1.5 w-full justify-center py-3 rounded-2xl text-white text-sm font-bold shadow-md transition-all hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #C16A52, #D98B6F)' }}>
-            <ChevronLeft size={15} /> Voltar ao Convite
-          </Link>
-        </div>
-      </div>
+          {confirmado && (
+            <p className="rsvp-note convite-in" style={{ '--d': '550ms' } as React.CSSProperties}>
+              Os detalhes da festa serão enviados para você em breve.
+            </p>
+          )}
+          <div className="rsvp-garland convite-in" style={{ '--d': '650ms' } as React.CSSProperties} aria-hidden>
+            <Image src="/convite/guirlanda.webp" alt="" width={615} height={105} unoptimized />
+          </div>
+        </section>
+      </>
     );
   }
 
-  // ─── Tela de busca ───────────────────────────────────────────────────────
+  // ─── Busca ───────────────────────────────────────────────────────────────
   return (
     <>
-      <div className="w-full max-w-xs bg-white/96 border-2 border-princess-rose/20 z-10 relative"
-        style={{ borderRadius: '28px', boxShadow: '0 20px 60px -10px rgba(138,107,79,0.20)' }}>
-        <div className="absolute inset-[5px] border border-princess-rose/08 rounded-[24px] pointer-events-none" />
+      {backLink}
 
-        <div className="p-6 space-y-5">
-          <Link href={`/convite/${slug}`}
-            className="inline-flex items-center gap-1 text-[11px] font-semibold text-princess-rose/70 hover:text-princess-rose transition-colors">
-            <ChevronLeft size={13} /> Voltar para o convite
-          </Link>
+      <section className="rsvp-main">
+        <h1 className="convite-text rsvp-title convite-in" style={{ '--d': '250ms' } as React.CSSProperties}>
+          Confirme sua presença
+        </h1>
+        <p className="convite-text rsvp-lead convite-in" style={{ '--d': '400ms' } as React.CSSProperties}>
+          {deadline ? `Favor confirmar até o dia ${deadline}` : 'Confirme sua presença pelo nome da família'}
+        </p>
 
-          <div className="text-center space-y-1.5">
-            <span className="text-2xl animate-bow inline-block select-none">🍄</span>
-            <h1 className="font-script text-4xl text-princess-rose leading-none">Confirmação</h1>
-            <p className="text-[11px] font-bold tracking-[0.3em] text-princess-text/40 uppercase">de presença</p>
-          </div>
+        <div className="rsvp-garland convite-in" style={{ '--d': '500ms' } as React.CSSProperties} aria-hidden>
+          <Image src="/convite/guirlanda.webp" alt="" width={615} height={105} unoptimized />
+        </div>
 
-          <div className="flex items-center gap-2">
-            <div className="h-px flex-1 bg-princess-rose/15" />
-            <Heart size={10} className="text-princess-rose/40 fill-princess-rose/25" />
-            <div className="h-px flex-1 bg-princess-rose/15" />
-          </div>
-
-          <p className="text-center text-xs text-princess-text/60 leading-relaxed">
-            Digite seu nome para encontrar seu convite e confirmar.
-          </p>
-
-          {/* Busca */}
-          <div className="relative">
+        <div className="rsvp-search convite-in" style={{ '--d': '650ms' } as React.CSSProperties}>
+          <label htmlFor="rsvp-query" className="rsvp-label">Digite seu nome ou o da sua família</label>
+          <div className="rsvp-input-wrap">
             {searching
-              ? <Loader2 size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-princess-rose/60 animate-spin" />
-              : <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-princess-rose/50" />}
+              ? <Loader2 className="rsvp-input-icon rsvp-spin" aria-hidden />
+              : <Search className="rsvp-input-icon" aria-hidden />}
             <input
-              type="text"
+              id="rsvp-query"
+              type="search"
               value={query}
-              onChange={e => setQuery(e.target.value)}
-              autoFocus
-              placeholder="Ex: Maria, Família Silva..."
-              className="w-full pl-9 pr-3.5 py-2.5 bg-white border border-princess-rose/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/25 text-sm placeholder:text-princess-text/30"
+              onChange={e => handleQueryChange(e.target.value)}
+              autoComplete="off"
+              placeholder="Ex: Maria, Família Silva"
+              className="rsvp-input"
             />
           </div>
 
-          {/* Resultados */}
-          <div className="space-y-2 min-h-[40px]">
-            {query.trim().length >= 2 && results.map(g => {
+          <div className="rsvp-results" aria-live="polite">
+            {showResults && results.map((g, i) => {
               const respondeu = g.status === 'confirmado' || g.status === 'nao_vai';
               return (
-                <button key={g.id} onClick={() => openFamily(g)}
-                  className="w-full text-left px-3.5 py-2.5 bg-[#FAF9F6] hover:bg-princess-pink-light/30 border border-princess-rose/15 rounded-xl transition flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-2 min-w-0">
-                    <Users size={14} className="text-princess-rose shrink-0" />
-                    <span className="text-sm font-semibold text-princess-text truncate">{g.name}</span>
-                  </span>
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => openFamily(g)}
+                  className="rsvp-result"
+                  style={{ '--i': i } as React.CSSProperties}
+                >
+                  <span className="rsvp-result-name">{g.name}</span>
                   {respondeu
-                    ? <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
-                        g.status === 'confirmado' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'
-                      }`}>{g.status === 'confirmado' ? 'Confirmado' : 'Não vai'}</span>
-                    : <ChevronLeft size={14} className="rotate-180 text-princess-rose/50 shrink-0" />}
+                    ? <span className={`rsvp-badge ${g.status === 'confirmado' ? 'is-yes' : 'is-no'}`}>
+                        {g.status === 'confirmado' ? 'Confirmado' : 'Não vai'}
+                      </span>
+                    : <ChevronRight size={18} className="rsvp-result-arrow" aria-hidden />}
                 </button>
               );
             })}
 
-            {searched && !searching && query.trim().length >= 2 && results.length === 0 && (
-              <div className="text-center py-3 px-2">
-                <p className="text-xs text-princess-text/55 leading-relaxed">
-                  Não encontramos seu nome na lista. Confira a grafia ou fale com os anfitriões. 💌
-                </p>
-              </div>
+            {searched && !searching && showResults && results.length === 0 && (
+              <p className="rsvp-empty">
+                Não encontramos esse nome na lista. Confira a grafia ou fale com os pais da {babyName}.
+              </p>
             )}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ── POPUP da família ── */}
+      {/* ── Popup da família ── */}
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !loading && setSelected(null)} />
-          <div className="relative z-10 w-full max-w-xs bg-white rounded-[28px] border-2 border-princess-rose/20 max-h-[90vh] overflow-y-auto"
-            style={{ boxShadow: '0 20px 60px -10px rgba(138,107,79,0.26)' }}>
-            <div className="p-6 space-y-4">
-              <button onClick={() => !loading && setSelected(null)}
-                className="absolute top-4 right-4 p-1.5 rounded-lg text-princess-rose hover:bg-princess-pink-light/30 transition">
-                <X size={16} />
+        <div className="rsvp-dialog-root">
+          <div className="rsvp-overlay" onClick={() => !loading && setSelected(null)} />
+          <div className="rsvp-dialog" role="dialog" aria-modal="true" aria-labelledby="rsvp-dialog-title">
+            <button
+              type="button"
+              onClick={() => !loading && setSelected(null)}
+              className="rsvp-close"
+              aria-label="Fechar"
+            >
+              <X size={20} />
+            </button>
+
+            <h2 id="rsvp-dialog-title" className="convite-text rsvp-dialog-title">{selected.name}</h2>
+            <p className="rsvp-dialog-sub">
+              {members.length > 0 ? 'Marque quem vai comparecer' : 'Confirme a presença da sua família'}
+            </p>
+
+            {members.length > 0 && (
+              <div className="rsvp-members">
+                {members.map((m, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    role="checkbox"
+                    aria-checked={!!checks[i]}
+                    onClick={() => toggle(i)}
+                    className={`rsvp-member ${checks[i] ? 'is-on' : ''}`}
+                  >
+                    <span className="rsvp-check" aria-hidden>{checks[i] && <Check size={14} strokeWidth={3} />}</span>
+                    {m.type === 'adulto'
+                      ? <User size={16} className="rsvp-member-icon" aria-hidden />
+                      : <Baby size={16} className="rsvp-member-icon" aria-hidden />}
+                    <span className="rsvp-member-name">{m.name}</span>
+                    <span className="rsvp-member-type">{TYPE_LABEL[m.type]}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="rsvp-field">
+              <label htmlFor="rsvp-phone" className="rsvp-label">WhatsApp (opcional)</label>
+              <input
+                id="rsvp-phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                placeholder="(11) 99999-8888"
+                className="rsvp-input rsvp-input-plain"
+              />
+              <span className="rsvp-help">Para enviarmos o local e o horário.</span>
+            </div>
+
+            {error && (
+              <p className="rsvp-error" role="alert">
+                <AlertCircle size={16} aria-hidden /> {error}
+              </p>
+            )}
+
+            <div className="rsvp-actions">
+              <button
+                type="button"
+                onClick={() => submit('confirmado')}
+                disabled={loading || (members.length > 0 && !anyChecked)}
+                className="rsvp-btn rsvp-btn-primary"
+              >
+                {loading ? <Loader2 size={18} className="rsvp-spin" aria-hidden /> : <Check size={18} strokeWidth={2.6} aria-hidden />}
+                Confirmar presença
               </button>
-
-              <div className="text-center space-y-1 pt-1">
-                <span className="text-xl select-none">🦊</span>
-                <h2 className="font-script text-3xl text-princess-rose leading-tight">{selected.name}</h2>
-                {confirmingMembers.length > 0 && (
-                  <p className="text-[11px] text-princess-text/50">
-                    Marque quem vai comparecer
-                  </p>
-                )}
-              </div>
-
-              {/* Membros */}
-              {confirmingMembers.length > 0 ? (
-                <div className="space-y-2">
-                  {confirmingMembers.map((m, i) => (
-                    <button key={i} type="button" onClick={() => toggle(i)}
-                      className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border transition text-left ${
-                        checks[i]
-                          ? 'bg-emerald-50 border-emerald-300'
-                          : 'bg-[#FAF9F6] border-princess-rose/15'
-                      }`}>
-                      <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition ${
-                        checks[i] ? 'bg-emerald-500 border-emerald-500' : 'border-princess-rose/30 bg-white'
-                      }`}>
-                        {checks[i] && <CheckCircle2 size={13} className="text-white" />}
-                      </span>
-                      {m.type === 'adulto' ? <User size={14} className="text-princess-rose/70 shrink-0" /> : <Baby size={14} className="text-princess-rose/70 shrink-0" />}
-                      <span className="text-sm font-medium text-princess-text truncate flex-1">{m.name}</span>
-                      <span className="text-[10px] font-semibold text-princess-text/40 shrink-0">
-                        {TYPE_LABEL[m.type]}{m.type === 'bebe' ? ' · colo' : ''}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-xs text-princess-text/55 leading-relaxed py-1">
-                  Confirme a presença da sua família abaixo.
-                </p>
-              )}
-
-              {/* WhatsApp opcional */}
-              <div>
-                <label className="block text-[10px] font-bold text-princess-text/55 uppercase tracking-wider mb-1.5">
-                  WhatsApp (opcional)
-                </label>
-                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
-                  placeholder="Ex: (11) 99999-8888"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF9F6] border border-princess-rose/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-princess-rose/25 text-sm placeholder:text-princess-text/30" />
-              </div>
-
-              {error && (
-                <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
-                  <AlertCircle size={13} className="shrink-0" /> {error}
-                </div>
-              )}
-
-              {/* Botões */}
-              <div className="space-y-2 pt-1">
-                <button onClick={() => submit('confirmado')}
-                  disabled={loading || (confirmingMembers.length > 0 && !anyChecked)}
-                  className="w-full py-3 rounded-2xl text-white font-serif-display font-bold text-sm shadow-md transition-all hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg, #C16A52, #D98B6F)' }}>
-                  {loading ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
-                  Confirmar presença
-                </button>
-                <button onClick={() => submit('nao_vai')} disabled={loading}
-                  className="w-full py-2.5 rounded-2xl text-princess-text/60 bg-[#FAF9F6] border border-princess-rose/15 font-medium text-sm transition hover:bg-princess-pink-light/20 disabled:opacity-40">
-                  Não poderei ir
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => submit('nao_vai')}
+                disabled={loading}
+                className="rsvp-btn rsvp-btn-ghost"
+              >
+                Não poderei ir
+              </button>
             </div>
           </div>
         </div>
